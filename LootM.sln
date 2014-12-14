@@ -4,6 +4,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0E55D7EE-223C-45A1-B006-A6713E8855AC}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootFrame.lua = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootFrame.lua
+		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootFrame.xml = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootFrame.xml
+		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.lua = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.lua
+		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.toc = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.toc
+		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootMComms.lua = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootMComms.lua
+	EndProjectSection
 EndProject
 Project("{5697748A-77EF-44CA-8824-4F5637E5945B}") = "LootM", "LootM\LootM.luaproj", "{E439935D-B2A2-46AE-856D-2AA408428F33}"
 EndProject

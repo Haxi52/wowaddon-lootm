@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML.old\UI.xsd">
   <Script file="LootFrame.lua" />
   <Button name="ItemEntryDetailsTemplate" virtual="true">
-    <Size x="380" y="52"/>
+    <Size x="364" y="52"/>
     <Anchors>
       <Anchor point="LEFT" />
     </Anchors>
@@ -29,7 +29,7 @@
           </Anchors>
           <Size x="48" y="48" />
         </Texture>
-        <FontString name="$parentTestString" text="this is some text" inherits="GameFontNormal" parentKey="ItemName" justifyH="LEFT">
+        <FontString text="this is some text" inherits="GameFontNormal" parentKey="ItemName" justifyH="LEFT">
           <Size x="200" y="20" />
           <Anchors>
             <Anchor point="LEFT" relativePoint="LEFT">
@@ -94,20 +94,28 @@
         <HighlightTexture file="Interface\Buttons\UI-GroupLoot-Pass-Highlight" alphaMode="ADD"/>
         <PushedTexture file="Interface\Buttons\UI-GroupLoot-Pass-Down"/>
       </Button>
-      
+
     </Frames>
   </Button>
   <Button name="PlayerRollDetail" virtual="true">
-    <Size x="350" y="30" />
+    <Size x="350" y="20" />
     <Anchors>
       <Anchor point="LEFT" />
     </Anchors>
     <Layers>
       <Layer>
+        <Texture parentKey="RollTexture" file="Interface\Buttons\UI-GroupLoot-Dice-Up">
+          <Size x="16" y="16" />
+          <Anchors>
+            <Anchor point="LEFT" />
+          </Anchors>
+        </Texture>
         <FontString parentKey="PlayerName" inherits="GameFontNormal">
           <Size x="150" y="20" />
           <Anchors>
-            <Anchor point="LEFT" />
+            <Anchor point="LEFT">
+              <Offset x="20" y="0" />
+            </Anchor>
           </Anchors>
         </FontString>
       </Layer>
@@ -139,12 +147,42 @@
           </Anchor>
         </Anchors>
       </Button>
-      <Frame name="ItemEntryContainer" parentKey="ItemEntryContainer">
-        <Size x="200" y="200" />
+      <ScrollFrame parentKey="ScrollFrame">
         <Anchors>
-          <Anchor point="TOPLEFT"></Anchor>
+          <Anchor point="TOPLEFT">
+            <Offset y="-12"/>
+          </Anchor>
+          <Anchor point="BOTTOMRIGHT">
+            <Offset y="12" />
+          </Anchor>
         </Anchors>
-      </Frame>
+        <Frames>
+          <Slider parentKey="Slider" inherits="UIPanelScrollBarTemplate" minValue="1" maxValue="1000" valueStep="1" defaultValue="1">
+            <Size x="16" />
+            <Anchors>
+              <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="LootMLootFrame">
+                <Offset x="-25" y="-42" />
+              </Anchor>
+              <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="LootMLootFrame">
+                <Offset x="-25" y="25" />
+              </Anchor>
+            </Anchors>
+            <Scripts>
+              <OnValueChanged>
+                self:GetParent():SetVerticalScroll(value);
+              </OnValueChanged>
+            </Scripts>
+          </Slider>
+        </Frames>
+        <ScrollChild>
+          <Frame name="ItemEntryContainer" parentKey="ItemEntryContainer">
+            <Size x="350" y="1000" />
+            <Anchors>
+              <Anchor point="TOPLEFT"></Anchor>
+            </Anchors>
+          </Frame>
+        </ScrollChild>
+      </ScrollFrame>
     </Frames>
     <Scripts>
       <OnLoad>
@@ -152,60 +190,4 @@
       </OnLoad>
     </Scripts>
   </Frame>
-</Ui>      
-<!--
-
-
-      <Frame name="PlayerListHeading">
-        <Size x="200" y="10" />
-        <Anchors>
-          <Anchor point="TOP">
-            <Offset x="0" y="-15"/>
-          </Anchor>
-        </Anchors>
-        <Layers>
-          <Layer>
-            <FontString text="Player" inherits="GameFontNormal">
-              <Size x="70" y="10"/>
-              <Anchors>
-                <Anchor point="LEFT"/>
-              </Anchors>
-            </FontString>
-            <FontString text="Equiped" inherits="GameFontNormal">
-              <Size x="70" y="10"/>
-              <Anchors>
-                <Anchor point="LEFT">
-                  <Offset x="75"/>
-                </Anchor>
-              </Anchors>
-            </FontString>
-            <FontString text="Action" inherits="GameFontNormal">
-              <Size x="70" y="10"/>
-              <Anchors>
-                <Anchor point="LEFT">
-                  <Offset x="155"/>
-                </Anchor>
-              </Anchors>
-            </FontString>
-          </Layer>
-        </Layers>
-      </Frame>
-
-<ScrollFrame inherits="UIPanelScrollFrameTemplate" parentKey="ItemEntryContainer">
-        <Anchors>
-          <Anchor point="TOP">
-            <Offset y="-25" />
-          </Anchor>
-        </Anchors>
-        <Size x="275" y="260" />
-        <ScrollChild>
-          <Frame name="ItemEntryContainerChildFrame" parentKey="ChildFrame">
-          </Frame>
-        </ScrollChild>
-      </ScrollFrame>
-      <Button inherits="UIPanelButtonTemplate" text="Hello world">
-        <Anchors>
-          <Anchor point="CENTER"></Anchor>
-        </Anchors>
-        <Size x="100" y="20"/>
-      </Button>-->
+</Ui>
