@@ -1,0 +1,11 @@
+## Interface: 60000
+## Title: LootM
+## Author: Buddhabear
+## Version: 0.0.1
+## Notes: Loot addon for <Rated M>
+## DefaultState: Enabled
+## LoadOnDemand: 0
+
+LootM.lua
+LootFrame.xml
+LootMComms.lua
