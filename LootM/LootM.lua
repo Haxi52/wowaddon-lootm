@@ -1,31 +1,7 @@
-local lootSession = { };
 
---[[
-lootSession =
-    [instance.mapid]
-    {
-        Boss[BossId] = (bossid = UnitGUID('unit'))
-        {
-            Name = GetUnitName('unit')
-            Slot[slot#]
-            {
-                SlotNumber,
-                ItemId,
-                ItemiLvl
-                ItemSlotType --head,neck etc.
-                Player[PlayerName]
-                {
-                    PlayerName,
-                    AverageiLvl,
-                    SlotiLvl,
-                    Action, -- need/greed/pass
-                    Roll, -- random number used for tie breaker
-                    IsAwarded
-                }
-            }
-        }
-    }
---]]
+seterrorhandler(print);
+
+local lootSession = { };
 
 LootMFrames = { };
 LootMEvents = { };
@@ -39,8 +15,9 @@ function LootMEvents:LOOT_OPENED(...)
     for i = 1, GetNumLootItems() do
         table.insert(lootTable, GetLootSlotLink(i));
     end
-    -- TODO: before sending comms for new loot, double check its a new set of loot items.
-    LootMComms.NewLoot(lootTable);
+    if (LootMItemEntries.IsNewLoot(lootTable)) then 
+        LootMComms.NewLoot(lootTable);
+    end
 end
 
 function LootMEvents:LOOT_CLOSED(...)
@@ -82,11 +59,20 @@ function RegisterFrame(frame)
     end
 end
 
-
-
 -- LootM_Show
 -- /lootm
 SLASH_LOOTM1 = '/lootm';
 SlashCmdList["LOOTM"] = function (message)
     LootMItemEntries.Show();
 end;
+
+
+-- TODO: Accordian loot items (?)
+-- compare against current equipped item
+-- add stat weights into comparison
+-- detect loot masterable items?
+-- prevent more than one change in loot choice
+-- prevent need on non-usable items
+-- Loot master triggered only
+-- assign loot
+-- sort player roll list by 'need'

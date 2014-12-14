@@ -9,30 +9,33 @@ local LootItemEntryFactory;
 LootMItemEntries = {};
 
 -- closure of player frame (each player listed under the loot item)
-local playerFrameFactory = function (parent, previousEntry, playerName, rollId)
+local playerFrameFactory = function (parent, index, playerName, rollId)
+    local indexOffset = 22;
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
-    if (previousEntry) then
-        frame:SetPoint("LEFT", previousEntry.GetFrame(), "LEFT", 0, -22);
-    else
-        frame:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 10, 0);
-    end
     local isShown = true;
 
+    local function setAnchor()
+        frame:SetPoint("TOPLEFT", parent.ItemDetails, "BOTTOMLEFT", 10, -((index - 1) * indexOffset));
+    end;
+
     local function updateFrame()
-        print('updateFrame');
         frame.PlayerName:SetText(playerName);
-        print('setting texture: ' .. rollTextures[rollId]);
         frame.RollTexture:SetTexture(rollTextures[rollId]);
         frame:Show();
         isShown = true;
     end;
 
+    setAnchor();
     updateFrame();
     return {
         IsShown = function () return isShown; end,    
         PlayerName = function () 
             if (not isShown) then return nil; end;
             return playerName; 
+        end,
+        SetIndex = function (i)
+            index = i;
+            setAnchor();
         end,
         SetRoll = function (r) 
             rollId = r; 
@@ -50,7 +53,7 @@ end;
 
 -- closure for each item being looted
 LootItemEntryFactory = function (e, previousEntry)
-
+    local defaultFrameHeight = 48;
     local isShown = true;
     local itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
         GetItemInfo(e);
@@ -58,7 +61,7 @@ LootItemEntryFactory = function (e, previousEntry)
     local entryContainer = LootMFrames['LootMLootFrame'].ScrollFrame.ItemEntryContainer;
     local frame = CreateFrame('Button', nil, entryContainer, 'ItemEntryDetailsTemplate');
     if (previousEntry) then
-        frame:SetPoint("LEFT", previousEntry.GetFrame(), "LEFT", 0, -148);
+        frame:SetPoint("TOPLEFT", previousEntry.GetFrame(), "BOTTOMLEFT");
     else
         frame:SetPoint("TOPLEFT", entryContainer, "TOPLEFT", 10, 0);
     end
@@ -67,18 +70,28 @@ LootItemEntryFactory = function (e, previousEntry)
         LootMComms.Roll(self:GetID(), itemLink);
     end;
 
-    frame.needButton:SetScript('OnClick', rollButtonClickHandler);
-    frame.greedButton:SetScript('OnClick', rollButtonClickHandler);
-    frame.passButton:SetScript('OnClick', rollButtonClickHandler);
+    frame.ItemDetails.needButton:SetScript('OnClick', rollButtonClickHandler);
+    frame.ItemDetails.greedButton:SetScript('OnClick', rollButtonClickHandler);
+    frame.ItemDetails.passButton:SetScript('OnClick', rollButtonClickHandler);
 
     local function populateFrame()
-        frame.ItemName:SetText(itemLink);
-        frame.ItemTexture:SetTexture(itemTexture);
+        frame.ItemDetails.ItemName:SetText(itemLink);
+        frame.ItemDetails.ItemTexture:SetTexture(itemTexture);
         -- TODO: disable need button when not usable;
         frame:Show();
     end;
 
     populateFrame();
+
+    local function updateHeight()
+        local playerCount = 0;
+        for k,v in pairs(playerFrames) do 
+            if (v.IsShown()) then 
+                playerCount = playerCount +1;
+            end
+        end;
+        frame:SetHeight((playerCount * 22) + defaultFrameHeight);
+    end;
 
     return {
         GetItemLink = function () return itemLink; end,
@@ -87,6 +100,7 @@ LootItemEntryFactory = function (e, previousEntry)
             itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
                 GetItemInfo(e);
             populateFrame();
+            updateHeight();
             isShown = true; 
         end,
         Hide = function () 
@@ -96,7 +110,7 @@ LootItemEntryFactory = function (e, previousEntry)
         end,
         GetFrame = function () return frame; end,
         SetPlayerRoll = function (player, rollId)
-            local previousEntry;
+            local index = 1;
             for k,v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
                     v.SetRoll(rollId);
@@ -105,11 +119,11 @@ LootItemEntryFactory = function (e, previousEntry)
                     v.Update(player, rollId);
                     return;
                 end
-                previousEntry = v;
+                index = index +1;
             end
-            table.insert(playerFrames, playerFrameFactory(frame, previousEntry, player, rollId));
+            table.insert(playerFrames, playerFrameFactory(frame, index, player, rollId));
             print('add roll ' .. rollId .. ' for ' .. player .. ' on item ' .. itemLink);
-
+            updateHeight();
         end,
     };
 end
@@ -146,6 +160,19 @@ function LootMEvents.LootMLootFrame_OnLoad()
                         v.SetPlayerRoll(player, rollId);
                     end
                 end
+            end,
+            IsNewLoot = function (lootTable)
+                for k,v in pairs(lootTable) do
+                    local newLoot = true;
+                    for l,i in pairs(itemEntries) do
+                        if (v == i.GetItemLink()) then
+                            newLoot = false;
+                            break;
+                        end
+                    end
+                    if (newLoot) then return true; end
+                end;
+                return false;
             end,
         };
     end)();
