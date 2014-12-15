@@ -147,7 +147,7 @@
             <Anchor point="LEFT" />
           </Anchors>
         </Texture>
-        <FontString parentKey="PlayerName" inherits="GameFontNormal">
+        <FontString parentKey="PlayerName" inherits="GameFontNormal" justifyH="LEFT">
           <Size x="150" y="20" />
           <Anchors>
             <Anchor point="LEFT">
@@ -165,6 +165,18 @@
             <Offset x="175" y="0" />
           </Anchor>
         </Anchors>
+        <Layers>
+          <Layer>
+            <FontString text="this is some text" inherits="GameFontHighlightSmall" parentKey="ItemLevel" justifyH="LEFT">
+              <Size x="50" y="20" />
+              <Anchors>
+                <Anchor point="LEFT">
+                  <Offset x="20"/>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
         <Scripts>
           <OnEnter>
             GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
@@ -183,9 +195,21 @@
         <Size x="16" y="16" />
         <Anchors>
           <Anchor point="LEFT">
-            <Offset x="194" y="0" />
+            <Offset x="225" y="0" />
           </Anchor>
         </Anchors>
+        <Layers>
+          <Layer>
+            <FontString text="this is some text" inherits="GameFontHighlightSmall" parentKey="ItemLevel" justifyH="LEFT">
+              <Size x="50" y="20" />
+              <Anchors>
+                <Anchor point="LEFT">
+                  <Offset x="20"/>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
         <Scripts>
           <OnEnter>
             GameTooltip:SetOwner(self, "ANCHOR_CURSOR");

@@ -1,6 +1,7 @@
 LootMComms = (function ()
 
-    local raidMessageType = "RAID";
+    local raidMessageType = "OFFICER"; -- changed for testing
+    --local raidMessageType = "RAID";
     local newLootPrefix = 'LootMNew';
     local newLootStartPrefix = 's';
     local newLootItemPrefix = 'i';

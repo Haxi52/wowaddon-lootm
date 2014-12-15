@@ -79,11 +79,11 @@ LootMItemEvaluator = (function ()
     ["INVTYPE_TRINKET"]={13,14},
     ["INVTYPE_CLOAK"]=15,
     ["INVTYPE_WEAPON"]={16,17},
-    ["INVTYPE_SHIELD"]=17,
-    ["INVTYPE_2HWEAPON"]=16,
-    ["INVTYPE_WEAPONMAINHAND"]=16,
-    ["INVTYPE_WEAPONOFFHAND"]=17,
-    ["INVTYPE_HOLDABLE"]=17,
+    ["INVTYPE_SHIELD"]={16,17},
+    ["INVTYPE_2HWEAPON"]={16,17},
+    ["INVTYPE_WEAPONMAINHAND"]={16,17},
+    ["INVTYPE_WEAPONOFFHAND"]={16,17},
+    ["INVTYPE_HOLDABLE"]={16,17},
     ["INVTYPE_RANGED"]=18,
     ["INVTYPE_THROWN"]=18,
     ["INVTYPE_RANGEDRIGHT"]=18,
@@ -102,7 +102,10 @@ LootMItemEvaluator = (function ()
             elseif (dataType == 'table') then
                 local output = {};
                 for k,v in pairs(playerSlot) do
-                    table.insert(output, GetInventoryItemLink('player', v));
+                    local equippedItemLink = GetInventoryItemLink('player', v);
+                    if (equippedItemLink) then
+                        table.insert(output, equippedItemLink);
+                    end
                 end
                 return output;
             end
@@ -117,19 +120,48 @@ SLASH_LOOTM1 = '/lootm';
 SlashCmdList["LOOTM"] = function (message)
     if (string.sub(message, 1, 4) == 'test') then
         LootMComms.NewLoot({ string.sub(message, 5) });
+    elseif (string.sub(message, 1, 4) == 'need') then
+        local x = LootMItemEntries.GetItems();
+        LootMItemEntries.SetPlayerRoll(x[1], 'TheNewGuy', '1', LootMItemEvaluator.GetPlayerItemDetails(x[1]));
+    elseif (string.sub(message, 1, 4) == 'gree') then
+        local x = LootMItemEntries.GetItems();
+        LootMItemEntries.SetPlayerRoll(x[1], 'TheNewGuy', '2', LootMItemEvaluator.GetPlayerItemDetails(x[1]));
     else
         LootMItemEntries.Show();
     end
 end;
 
+-- table sort iterator
+-- http://stackoverflow.com/a/15706820
+function spairs(t, order)
+    -- collect the keys
+    local keys = {}
+    for k in pairs(t) do keys[#keys+1] = k end
+
+    -- if order function given, sort by it by passing the table and keys a, b,
+    -- otherwise just sort the keys 
+    if order then
+        table.sort(keys, function(a,b) return order(t, a, b) end)
+    else
+        table.sort(keys)
+    end
+
+    -- return the iterator function
+    local i = 0
+    return function()
+        i = i + 1
+        if keys[i] then
+            return keys[i], t[keys[i]]
+        end
+    end
+end
+
 
 -- TODO: Accordian loot items (?)
--- compare against current equipped item
 -- add stat weights into comparison
 -- detect loot masterable items?
 -- prevent more than one change in loot choice
 -- prevent need on non-usable items
--- Loot master triggered only
 -- assign loot
 -- sort player roll list by 'need'
 -- reset loot session (loot master button)

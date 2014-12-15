@@ -13,6 +13,7 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
     local indexOffset = 22;
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
     local isShown = true;
+    local equippedItemLevel = 1000;
 
     local function setAnchor()
         frame:SetPoint("TOPLEFT", parent.ItemDetails, "BOTTOMLEFT", 10, -((index - 1) * indexOffset));
@@ -23,7 +24,9 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
             local _, itemLink, _, itemLevel, _, _, _, _, _, itemTexture, _ = GetItemInfo(itemId);
             button:SetNormalTexture(itemTexture);
             button.ItemLink = itemLink;
+            button.ItemLevel:SetText(itemLevel);
             button:Show();
+            equippedItemLevel = math.min(equippedItemLevel, itemLevel);
         else
             button:Hide();
         end
@@ -32,7 +35,7 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
     local function updateFrame()
         frame.PlayerName:SetText(playerName);
         frame.RollTexture:SetTexture(rollTextures[rollId]);
-        
+        equippedItemLevel = 1000;
         setItemFrame(itemsTable[1], frame.EquippedItem1);
         setItemFrame(itemsTable[2], frame.EquippedItem2);
         
@@ -45,6 +48,8 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
     updateFrame();
     return {
         IsShown = function () return isShown; end,    
+        GetRoll = function () return rollId; end,
+        GetItemLevel = function () return equippedItemLevel; end,
         PlayerName = function () 
             if (not isShown) then return nil; end;
             return playerName; 
@@ -58,9 +63,10 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
             itemsTable = i;
             updateFrame();
         end,
-        Update = function (player, r) 
+        Update = function (player, r, i) 
             rollId = r;
             playerName = player;
+            itemsTable = i;
             updateFrame();
         end,
         Hide = function () isShown = false; frame:Hide(); end,
@@ -95,7 +101,7 @@ LootItemEntryFactory = function (e, previousEntry)
         frame.ItemDetails.ItemName:SetText(itemLink);
         frame.ItemDetails.ItemTexture:SetTexture(itemTexture);
         frame.ItemDetails.ItemLink = itemLink;
-        frame.ItemDetails.ItemLevel:SetText('('..itemLevel..')');
+        frame.ItemDetails.ItemLevel:SetText(itemLevel);
         local thisItemType, thisItemSubType;
         if (itemSubType == 'Miscellaneous') then
             thisItemType = _G[itemEquipLocation];
@@ -130,6 +136,21 @@ LootItemEntryFactory = function (e, previousEntry)
         frame:SetHeight((playerCount * 22) + defaultFrameHeight);
     end;
 
+    local function sortPlayerTable()
+        local index =1;
+        for k,v in spairs(playerFrames, function (t, a, b)
+                if (t[a].GetRoll() == '0') then return true; end
+                if (t[a].GetRoll() == t[b].GetRoll()) then
+                    return t[a].GetItemLevel() < t[b].GetItemLevel();
+                else
+                    return t[a].GetRoll() < t[b].GetRoll();
+                end
+            end) do
+            v.SetIndex(index);
+            index = index +1;
+        end
+    end;
+
     return {
         GetItemLink = function () return itemLink; end,
         IsShown = function () return isShown; end,
@@ -151,14 +172,17 @@ LootItemEntryFactory = function (e, previousEntry)
             for k,v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
                     v.SetRoll(rollId, itemsTable);
+                    sortPlayerTable();
                     return;
                 elseif (not v.IsShown()) then
-                    v.Update(player, rollId);
+                    v.Update(player, rollId, itemsTable);
+                    sortPlayerTable();
                     return;
                 end
                 index = index +1;
             end
             table.insert(playerFrames, playerFrameFactory(frame, index, player, rollId, itemsTable));
+            sortPlayerTable();
             updateHeight();
         end,
     };
@@ -189,6 +213,13 @@ function LootMEvents.LootMLootFrame_OnLoad()
                     lastEntry = v;
                 end
                 table.insert(itemEntries, LootItemEntryFactory(itemLink, lastEntry));
+            end,
+            GetItems = function ()
+                local output = {};
+                for k,v in pairs(itemEntries) do
+                    table.insert(output, v.GetItemLink());
+                end
+                return output;
             end,
             SetPlayerRoll = function (itemLink, player, rollId, itemsTable)
                 for k,v in pairs(itemEntries) do
