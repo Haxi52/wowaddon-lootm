@@ -20,7 +20,17 @@ LootMComms = (function ()
             LootMItemEntries.ShowItem(string.sub(message, 2));
         end,
         [rollPrefix] = function (message, sender) 
-            LootMItemEntries.SetPlayerRoll(string.sub(message, 2), sender, string.sub(message, 1, 1));
+            local roll = string.sub(message, 1, 1);
+            local itemsTable = {}; 
+            local firstItem = nil;
+            for item in string.gmatch(string.sub(message, 2), '([^;]+)') do
+                if (not firstItem) then 
+                    firstItem = item; 
+                else
+                    table.insert(itemsTable, item);
+                end
+            end
+            LootMItemEntries.SetPlayerRoll(firstItem, sender, roll, itemsTable);
         end,
         [awardPrefix] = function (message, sender) return; end,
     };
@@ -40,8 +50,12 @@ LootMComms = (function ()
             messagePrefix = newLootEndPrefix;
             SendAddonMessage(newLootPrefix, messagePrefix, raidMessageType);
         end,
-        Roll = function(rollId, itemLink) 
-            SendAddonMessage(rollPrefix, rollId .. itemLink, raidMessageType);
+        Roll = function(rollId, itemLink, playerItems) 
+            local playerItemsString = '';
+            if (playerItems) then
+                playerItemsString = ';' .. table.concat(playerItems, ';');
+            end
+            SendAddonMessage(rollPrefix, rollId .. itemLink .. playerItemsString, raidMessageType);
         end,
         Award = function(itemLink, awardee) return; end,
         MessageRecieved = chatMessageEvent,

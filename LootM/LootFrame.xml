@@ -8,7 +8,7 @@
       <Anchor point="TOPLEFT" />
     </Anchors>
     <Frames>
-      <Button parentKey="ItemDetails">
+      <Button parentKey="ItemDetails" enableMouse="true">
         <Size x="364" y="52"/>
         <Anchors>
           <Anchor point="TOPLEFT" />
@@ -39,7 +39,31 @@
               <Size x="200" y="20" />
               <Anchors>
                 <Anchor point="LEFT" relativePoint="LEFT">
-                  <Offset x="55" y="0"/>
+                  <Offset x="55" y="10"/>
+                </Anchor>
+              </Anchors>
+            </FontString>
+            <FontString text="this is some text" inherits="GameFontHighlightSmall" parentKey="ItemLevel" justifyH="LEFT">
+              <Size x="50" y="20" />
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="LEFT">
+                  <Offset x="55" y="-10"/>
+                </Anchor>
+              </Anchors>
+            </FontString>
+            <FontString text="this is some text" inherits="GameFontHighlightSmall" parentKey="ItemType" justifyH="LEFT">
+              <Size x="100" y="20" />
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="LEFT">
+                  <Offset x="90" y="-10"/>
+                </Anchor>
+              </Anchors>
+            </FontString>
+            <FontString text="this is some text" inherits="GameFontHighlightSmall" parentKey="ItemSubType" justifyH="LEFT">
+              <Size x="100" y="20" />
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="LEFT">
+                  <Offset x="180" y="-10"/>
                 </Anchor>
               </Anchors>
             </FontString>
@@ -56,8 +80,7 @@
             </Anchors>
             <Scripts>
               <OnLoad>
-                self.tooltipText=NEED;
-                self.newbieText=NEED_NEWBIE;
+                self.tooltipText="Main Spec";
               </OnLoad>
             </Scripts>
             <NormalTexture file="Interface\Buttons\UI-GroupLoot-Dice-Up"/>
@@ -74,8 +97,7 @@
             </Anchors>
             <Scripts>
               <OnLoad>
-                self.tooltipText=GREED;
-                self.newbieText=GREED_NEWBIE;
+                self.tooltipText="Off Spec/Minor upgrade";
               </OnLoad>
             </Scripts>
             <NormalTexture file="Interface\Buttons\UI-GroupLoot-Coin-Up"/>
@@ -102,9 +124,18 @@
           </Button>
 
         </Frames>
+        <Scripts>
+          <OnEnter>
+            GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+            GameTooltip:SetHyperlink(self.ItemLink);
+            GameTooltip:Show();
+          </OnEnter>
+          <OnLeave>
+            GameTooltip:Hide();
+          </OnLeave>
+        </Scripts>
       </Button>
     </Frames>
-
   </Button>
   <Button name="PlayerRollDetail" virtual="true">
     <Size x="350" y="20" />
@@ -126,6 +157,50 @@
         </FontString>
       </Layer>
     </Layers>
+    <Frames>
+      <Button parentKey="EquippedItem1" enableMouse="true">
+        <Size x="16" y="16" />
+        <Anchors>
+          <Anchor point="LEFT">
+            <Offset x="175" y="0" />
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnEnter>
+            GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+            GameTooltip:SetHyperlink(self.ItemLink);
+            GameTooltip:Show();
+          </OnEnter>
+          <OnLeave>
+            GameTooltip:Hide();
+          </OnLeave>
+        </Scripts>
+        <NormalTexture>
+          <Size x="16" y="16" />
+        </NormalTexture>
+      </Button>
+      <Button parentKey="EquippedItem2" enableMouse="true">
+        <Size x="16" y="16" />
+        <Anchors>
+          <Anchor point="LEFT">
+            <Offset x="194" y="0" />
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnEnter>
+            GameTooltip:SetOwner(self, "ANCHOR_CURSOR");
+            GameTooltip:SetHyperlink(self.ItemLink);
+            GameTooltip:Show();
+          </OnEnter>
+          <OnLeave>
+            GameTooltip:Hide();
+          </OnLeave>
+        </Scripts>
+        <NormalTexture>
+          <Size x="16" y="16" />
+        </NormalTexture>
+      </Button>
+    </Frames>
   </Button>
   <Frame name="LootMLootFrame" parent="UIParent" hidden="true" toplevel="true" enableMouse="true" movable="true">
     <Size>
