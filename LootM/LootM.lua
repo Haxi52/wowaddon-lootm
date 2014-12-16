@@ -94,13 +94,27 @@ LootMItemEvaluator = (function ()
     ["INVTYPE_TABARD"]=19,
     };
 
-    local function getItemWeight(itemLink, statTable)
+    local function getItemValue(itemLink, weightTable)
         local itemStats = GetItemStats(itemLink);
-        local itemWeight =0;
+        local itemValue =0;
         for k,v in pairs(statTable) do
-            
+            local weight = weightTable[k];
+            if (weight and weight >=0) then
+                itemValue = itemValue + (v * weight);
+            end
         end
+        return itemValue;
     end;
+
+    local function getImprovementRating(equippedValue, newValue)
+        local value =0;
+        if (equippedValue > 0 and newValue > 0) then
+            value = (newValue - equippedValue) / equippedValue;
+            value = math.max(0, value);
+            value = value * 100;
+        end
+        return value;
+    end
 
     return {
         GetPlayerItemDetails = function (itemLink)
@@ -108,22 +122,32 @@ LootMItemEvaluator = (function ()
                 GetItemInfo(itemLink);
             local playerSlot = inventoryMap[itemEquipLocation];
             local dataType = type(playerSlot);
+            local output = {};
 
             if (dataType == 'number') then
-                return { GetInventoryItemLink('player', playerSlot) };
+                table.insert(output, GetInventoryItemLink('player', playerSlot));
             elseif (dataType == 'table') then
-                local output = {};
                 for k,v in pairs(playerSlot) do
                     local equippedItemLink = GetInventoryItemLink('player', v);
                     if (equippedItemLink) then
                         table.insert(output, equippedItemLink);
                     end
                 end
-                return output;
             end
+
+            local improvementRating =0;
+            for k,v in pairs(output) do
+                local old = getItemValue(itemLink, LootMStatWeights[1]);
+                local new = getItemValue(v, LootMStatWeights[1]);
+                improvementRating = math.max(
+                    getImprovementRating(old, new),
+                    improvementRating);
+            end
+
+            return output, improvementRating;
         end,
-        GetItemWeight = function(itemLink, statTable)
-            return getItemWeight(itemLink, statTable);
+        GetItemValue = function(itemLink, weightTable)
+            return getItemValue(itemLink, weightTable);
         end,
     };
 
@@ -173,14 +197,14 @@ end
 
 
 -- TODO: Accordian loot items (?)
--- add stat weights into comparison
--- detect loot masterable items?
+-- add stat weights into comparison (left is to propegate to display)
+-- edit stat weights
 -- prevent more than one change in loot choice
 -- prevent need on non-usable items
 -- assign loot
--- sort player roll list by 'need'
 -- reset loot session (loot master button)
 
+-- for debugging
 function PrintTable(t)
     for k,v in pairs(t) do
         print(k..": "..v);
