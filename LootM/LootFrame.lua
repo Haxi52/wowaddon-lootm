@@ -1,4 +1,3 @@
-
 local rollTextures = {
     ['0'] = 'Interface\\Buttons\\UI-GroupLoot-Pass-Up',
     ['1'] = 'Interface\\Buttons\\UI-GroupLoot-Dice-Up',

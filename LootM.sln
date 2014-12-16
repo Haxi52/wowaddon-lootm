@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.lua = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.lua
 		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.toc = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootM.toc
 		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootMComms.lua = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootMComms.lua
+		..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootMStatWeights.lua = ..\..\..\..\..\..\Program Files (x86)\World of Warcraft\Interface\AddOns\LootM\LootMStatWeights.lua
 	EndProjectSection
 EndProject
 Project("{5697748A-77EF-44CA-8824-4F5637E5945B}") = "LootM", "LootM\LootM.luaproj", "{E439935D-B2A2-46AE-856D-2AA408428F33}"

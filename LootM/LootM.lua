@@ -1,4 +1,3 @@
-
 seterrorhandler(print);
 
 LootMFrames = { };
@@ -13,7 +12,11 @@ function LootMEvents:LOOT_OPENED(...)
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = { };
     for i = 1, GetNumLootItems() do
-        table.insert(lootTable, GetLootSlotLink(i));
+        local itemLink = GetLootSlotLink(i);
+        _, _, itemRarity = GetItemInfo(itemLink);
+        if (itemRarity >= GetLootThreshold()) then
+            table.insert(lootTable, itemLink);
+        end
     end
     if (LootMItemEntries.IsNewLoot(lootTable)) then 
         LootMComms.NewLoot(lootTable);
@@ -90,6 +93,15 @@ LootMItemEvaluator = (function ()
     ["INVTYPE_RELIC"]=18,
     ["INVTYPE_TABARD"]=19,
     };
+
+    local function getItemWeight(itemLink, statTable)
+        local itemStats = GetItemStats(itemLink);
+        local itemWeight =0;
+        for k,v in pairs(statTable) do
+            
+        end
+    end;
+
     return {
         GetPlayerItemDetails = function (itemLink)
             local itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
@@ -109,6 +121,9 @@ LootMItemEvaluator = (function ()
                 end
                 return output;
             end
+        end,
+        GetItemWeight = function(itemLink, statTable)
+            return getItemWeight(itemLink, statTable);
         end,
     };
 
@@ -165,3 +180,9 @@ end
 -- assign loot
 -- sort player roll list by 'need'
 -- reset loot session (loot master button)
+
+function PrintTable(t)
+    for k,v in pairs(t) do
+        print(k..": "..v);
+    end
+end

@@ -35,6 +35,7 @@
     <Compile Include="LootFrame.lua" />
     <Compile Include="LootM.lua" />
     <Compile Include="LootMComms.lua" />
+    <Compile Include="LootMStatWeights.lua" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="LootFrame.xml" />

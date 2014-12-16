@@ -3,13 +3,13 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML.old\UI.xsd">
   <Script file="LootFrame.lua" />
   <Button name="ItemEntryDetailsTemplate" virtual="true">
-    <Size x="364" y="52"/>
+    <Size x="414" y="52"/>
     <Anchors>
       <Anchor point="TOPLEFT" />
     </Anchors>
     <Frames>
       <Button parentKey="ItemDetails" enableMouse="true">
-        <Size x="364" y="52"/>
+        <Size x="414" y="52"/>
         <Anchors>
           <Anchor point="TOPLEFT" />
         </Anchors>
@@ -67,6 +67,22 @@
                 </Anchor>
               </Anchors>
             </FontString>
+            <Texture parentKey="ImprovementRatingBorder" file="Interface\buttons\checkbuttonglow">
+              <Size x="64" y="64" />
+              <Anchors>
+                <Anchor point="TOPRIGHT">
+                  <Offset x="6" y="5"/>
+                </Anchor>
+              </Anchors>
+            </Texture>
+            <FontString text="99" parentKey="ImprovementRating" inherits="GameFontHighlight" justifyH="CENTER" outline="THICK">
+              <Size x="64" y="64" />
+              <Anchors>
+                <Anchor point="TOPRIGHT">
+                  <Offset x="6" y="5"/>
+                </Anchor>
+              </Anchors>
+            </FontString>
           </Layer>
         </Layers>
         <Frames>
@@ -74,7 +90,7 @@
             <Anchors>
               <Anchor point="TOPRIGHT">
                 <Offset>
-                  <AbsDimension x="-70" y="-14"/>
+                  <AbsDimension x="-120" y="-14"/>
                 </Offset>
               </Anchor>
             </Anchors>
@@ -91,7 +107,7 @@
             <Anchors>
               <Anchor point="TOPRIGHT">
                 <Offset>
-                  <AbsDimension x="-38" y="-14"/>
+                  <AbsDimension x="-88" y="-14"/>
                 </Offset>
               </Anchor>
             </Anchors>
@@ -108,7 +124,7 @@
             <Anchors>
               <Anchor point="TOPRIGHT">
                 <Offset>
-                  <AbsDimension x="-5" y="-10"/>
+                  <AbsDimension x="-55" y="-10"/>
                 </Offset>
               </Anchor>
             </Anchors>
@@ -138,7 +154,7 @@
     </Frames>
   </Button>
   <Button name="PlayerRollDetail" virtual="true">
-    <Size x="350" y="20" />
+    <Size x="400" y="20" />
     <Layers>
       <Layer>
         <Texture parentKey="RollTexture" file="Interface\Buttons\UI-GroupLoot-Dice-Up">
@@ -226,9 +242,9 @@
       </Button>
     </Frames>
   </Button>
-  <Frame name="LootMLootFrame" parent="UIParent" hidden="true" toplevel="true" enableMouse="true" movable="true">
+  <Frame name="LootMLootFrame" parent="UIParent" hidden="true" toplevel="true" movable="true">
     <Size>
-      <AbsDimension x="400" y="300" />
+      <AbsDimension x="450" y="400" />
     </Size>
     <Anchors>
       <Anchor point="CENTER" />
