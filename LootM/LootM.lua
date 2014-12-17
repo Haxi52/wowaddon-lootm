@@ -82,17 +82,59 @@ LootMItemEvaluator = (function ()
     ["INVTYPE_TRINKET"]={13,14},
     ["INVTYPE_CLOAK"]=15,
     ["INVTYPE_WEAPON"]={16,17},
-    ["INVTYPE_SHIELD"]={16,17},
+    ["INVTYPE_SHIELD"]= 17,
     ["INVTYPE_2HWEAPON"]={16,17},
     ["INVTYPE_WEAPONMAINHAND"]={16,17},
-    ["INVTYPE_WEAPONOFFHAND"]={16,17},
-    ["INVTYPE_HOLDABLE"]={16,17},
+    ["INVTYPE_WEAPONOFFHAND"]= 17,
+    ["INVTYPE_HOLDABLE"]= 17,
     ["INVTYPE_RANGED"]=18,
     ["INVTYPE_THROWN"]=18,
     ["INVTYPE_RANGEDRIGHT"]=18,
     ["INVTYPE_RELIC"]=18,
     ["INVTYPE_TABARD"]=19,
+    -- Token texutres TODO: Lookup the real texture files
+    ["icons/chest_armor_token"] = 5,
+    ["icons/hands_armor_token"] = 10,
+    ["icons/head_armor_token"] = 1,
+    ["icons/legs_armor_token"] = 7,
+    ["icons/sholders_armor_token"] = 3,
     };
+
+    -- the premis on thsi one is that a token is misc/junk with specific textures for each slot
+    -- as long as the game keeps that, we can assume these will be tokens
+    local function getItemTokenSlot(itemType, itemSubType, itemTexture)
+        if (itemType ~= 'Miscellaneous' or itemSubType ~= 'Junk') then return nil; end
+        return inventoryMap[string.lower(itemTexture)];
+    end
+
+    local function getPlayerRelatedItems(itemLink)
+        local itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
+            GetItemInfo(itemLink);
+        -- check to see if the item is a token, then assing the appropreate inventory slot for said token
+        local playerSlot = getItemTokenSlot(itemType, itemSubType, itemTexture);
+        if (not playerSlot) then
+            playerSlot = inventoryMap[itemEquipLocation];
+        end
+        -- weapons are handled differently
+        if (itemType == 'Weapon') then
+        end
+
+        local dataType = type(playerSlot);
+        local playerItems = {};
+
+        if (dataType == 'number') then
+            table.insert(playerItems, GetInventoryItemLink('player', playerSlot));
+        elseif (dataType == 'table') then
+            for k,v in pairs(playerSlot) do
+                local equippedItemLink = GetInventoryItemLink('player', v);
+                if (equippedItemLink) then
+                    table.insert(playerItems, equippedItemLink);
+                end
+            end
+        end
+        -- returns item links for the equpped item and a bool if the item is a weapon
+        return playerItems, (playerSlot == 16 or playerSlot[1] == 16);
+    end;
 
     local function getItemValue(itemLink, weightTable)
         local itemStats = GetItemStats(itemLink);
@@ -118,25 +160,10 @@ LootMItemEvaluator = (function ()
 
     return {
         GetPlayerItemDetails = function (itemLink)
-            local itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
-                GetItemInfo(itemLink);
-            local playerSlot = inventoryMap[itemEquipLocation];
-            local dataType = type(playerSlot);
-            local output = {};
-
-            if (dataType == 'number') then
-                table.insert(output, GetInventoryItemLink('player', playerSlot));
-            elseif (dataType == 'table') then
-                for k,v in pairs(playerSlot) do
-                    local equippedItemLink = GetInventoryItemLink('player', v);
-                    if (equippedItemLink) then
-                        table.insert(output, equippedItemLink);
-                    end
-                end
-            end
-
+            
+            local playerItems, isWeapon = getPlayerRelatedItems(itemLink);
             local improvementRating =0;
-            for k,v in pairs(output) do
+            for k,v in pairs(playerItems) do
                 local old = getItemValue(itemLink, LootMStatWeights[1]);
                 local new = getItemValue(v, LootMStatWeights[1]);
                 improvementRating = math.max(
@@ -144,7 +171,7 @@ LootMItemEvaluator = (function ()
                     improvementRating);
             end
 
-            return output, improvementRating;
+            return playerItems, improvementRating;
         end,
         GetItemValue = function(itemLink, weightTable)
             return getItemValue(itemLink, weightTable);
