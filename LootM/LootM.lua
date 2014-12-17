@@ -81,17 +81,23 @@ LootMItemEvaluator = (function ()
     ["INVTYPE_FINGER"]={11,12},
     ["INVTYPE_TRINKET"]={13,14},
     ["INVTYPE_CLOAK"]=15,
-    ["INVTYPE_WEAPON"]={16,17},
-    ["INVTYPE_SHIELD"]= 17,
-    ["INVTYPE_2HWEAPON"]={16,17},
-    ["INVTYPE_WEAPONMAINHAND"]={16,17},
-    ["INVTYPE_WEAPONOFFHAND"]= 17,
-    ["INVTYPE_HOLDABLE"]= 17,
-    ["INVTYPE_RANGED"]=18,
     ["INVTYPE_THROWN"]=18,
-    ["INVTYPE_RANGEDRIGHT"]=18,
     ["INVTYPE_RELIC"]=18,
     ["INVTYPE_TABARD"]=19,
+
+    -- weapon slots
+    -- 2 handers
+    ["INVTYPE_2HWEAPON"]={16,17}, -- 2 handers/staves
+    ["INVTYPE_RANGED"]=18, -- bows (2h)
+    -- 1 handers
+    ["INVTYPE_WEAPON"]={16,17}, -- one handed
+    ["INVTYPE_WEAPONMAINHAND"]={16,17}, -- only right handded
+    ["INVTYPE_RANGEDRIGHT"]=18, -- main wands
+    -- off handers
+    ["INVTYPE_SHIELD"]= 17, -- duh
+    ["INVTYPE_WEAPONOFFHAND"]= 17, -- only left hand?
+    ["INVTYPE_HOLDABLE"]= 17, -- off hand
+
     -- Token texutres TODO: Lookup the real texture files
     ["icons/chest_armor_token"] = 5,
     ["icons/hands_armor_token"] = 10,
@@ -230,6 +236,7 @@ end
 -- prevent need on non-usable items
 -- assign loot
 -- reset loot session (loot master button)
+-- spirit only to healers, bonus armor only to tanks
 
 -- for debugging
 function PrintTable(t)
