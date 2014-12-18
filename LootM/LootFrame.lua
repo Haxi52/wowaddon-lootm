@@ -17,6 +17,7 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
     local equippedItemLevel = 1000;
 
     local function setAnchor()
+        frame:ClearAllPoints();
         frame:SetPoint("TOPLEFT", parent.ItemDetails, "BOTTOMLEFT", 10, -((index - 1) * indexOffset));
     end;
 
@@ -80,7 +81,7 @@ end;
 
 -- closure for each item being looted
 LootItemEntryFactory = function (e, previousEntry, playerDetails)
-    local defaultFrameHeight = 48;
+    local defaultFrameHeight = 52;
     local PlayerDetails = playerDetails;
     local isShown = true;
     local rollChances = maxRollChances;
@@ -191,10 +192,12 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
                 if (v.PlayerName() == player) then
                     v.SetRoll(rollId, itemsTable, improvementRating);
                     sortPlayerTable();
+                    updateHeight();
                     return;
                 elseif (not v.IsShown()) then
                     v.Update(player, rollId, itemsTable, improvementRating);
                     sortPlayerTable();
+                    updateHeight();
                     return;
                 end
                 index = index +1;
@@ -207,6 +210,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
 end
 
 function LootMEvents.LootMLootFrame_OnLoad()
+    LootM.Update();
     -- the main collection of loot items
     LootMItemEntries = (function () 
         local itemEntries = {};

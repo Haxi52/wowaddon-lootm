@@ -4,20 +4,22 @@ LootMFrames = { };
 LootMEvents = { };
 LootMItemEvaluator = { };
 
-local LootM = CreateFrame("FRAME", "LootM"), { };
+LootM = CreateFrame("FRAME", "LootM"), { };
 
 LootMFrames["LootM"] = LootM;
 
-function LootMEvents:LOOT_OPENED(...)
-    if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
-    local lootTable = { };
-    for i = 1, GetNumLootItems() do
-        local itemLink = GetLootSlotLink(i);
-        _, _, itemRarity = GetItemInfo(itemLink);
-        if (itemRarity >= GetLootThreshold()) then
-            table.insert(lootTable, itemLink);
-        end
+LootM.Update = function ()
+    print('updated');
+    if (LootM.IsLootMaster()) then
+        LootMFrames["LootMLootFrame"].ResetButton:Show();
+    else
+        LootM.ResetButton:Hide();
     end
+end
+
+function LootMEvents:LOOT_OPENED(...)
+    --if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
+    local lootTable = LootM.GetLootItems();
     if (LootMItemEntries.IsNewLoot(lootTable)) then
         LootMComms.NewLoot(lootTable);
     end
@@ -26,7 +28,18 @@ end
 function LootMEvents:LOOT_CLOSED(...)
 
 end
-
+function LootMEvents:GROUP_ROSTER_UPDATE(...)
+    LootM.Update();
+end
+function LootMEvents:PARTY_LOOT_METHOD_CHANGED(...)
+    LootM.Update();
+end
+function LootMEvents:RAID_INSTANCE_WELCOME(...)
+    LootM.Update();
+end
+function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
+    LootMComms.ItemsLoaded(...);
+end
 function LootMEvents:CHAT_MSG_ADDON(...)
     LootMComms.MessageRecieved(...);
 end
@@ -34,6 +47,8 @@ end
 LootM:SetScript("OnEvent", function(self, event, ...)
     LootMEvents[event](self, ...);
 end );
+LootM:SetScript("OnLoad", LootM.Update);
+
 
 for k, v in pairs(LootMEvents) do
     LootM:RegisterEvent(k);
@@ -51,6 +66,23 @@ LootM.IsLootMaster = function()
     return false;
 end
 
+LootM.GetLootItems = function () 
+    local lootTable = { };
+    for i = 1, GetNumLootItems() do
+        local itemLink = GetLootSlotLink(i);
+        _, _, itemRarity = GetItemInfo(itemLink);
+        if (itemRarity >= GetLootThreshold()) then
+            table.insert(lootTable, itemLink);
+        end
+    end
+    return lootTable;
+end
+
+LootM.ResetLoot = function ()
+    if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
+    local lootTable = LootM.GetLootItems();
+    LootMComms.NewLoot(lootTable);
+end
 
 function RegisterFrame(frame)
     if (frame == nil or not frame:GetName()) then return; end
@@ -61,7 +93,6 @@ function RegisterFrame(frame)
         LootMEvents[frameName .. '_OnLoad'](self, frame);
     end
 end
-
 
 LootMItemEvaluator =( function()
 
@@ -87,11 +118,11 @@ LootMItemEvaluator =( function()
     };
 
     local tokenIcons = {
-        ["icons/chest_armor_token"] = 5,
-        ["icons/hands_armor_token"] = 10,
-        ["icons/head_armor_token"] = 1,
-        ["icons/legs_armor_token"] = 7,
-        ["icons/sholders_armor_token"] = 3,
+        ["interface\icons\inv_chest_chain_10"] = 5,
+        ["interface\icons\inv_gauntlets_29"] = 10,
+        ["interface\icons\inv_helmet_24"] = 1,
+        ["interface\icons\inv_misc_desecrated_platepants"] = 7,
+        ["interface\icons\inv_shoulder_22"] = 3,
     };
 
     local offHandItemType, twoHandItemType, oneHandItemType = "offhand", "twohand", "onehand";
@@ -312,7 +343,6 @@ end
 -- edit stat weights
 -- prevent need on non-usable items
 -- assign loot
--- reset loot session (loot master button)
 -- spirit only to healers, bonus armor only to tanks
 -- Improvement ratings on trinkets?
 

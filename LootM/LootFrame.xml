@@ -275,6 +275,19 @@
           </Anchor>
         </Anchors>
       </Button>
+      <Button inherits="UIPanelButtonTemplate" text="Reset" parentKey="ResetButton" hidden="true">
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset x="20" y="20" />
+          </Anchor>
+        </Anchors>
+        <Size x="100" y="25" />
+        <Scripts>
+          <OnClick>
+            LootM.ResetLoot();
+          </OnClick>
+        </Scripts>
+      </Button>
       <ScrollFrame parentKey="ScrollFrame">
         <Anchors>
           <Anchor point="TOPLEFT">
