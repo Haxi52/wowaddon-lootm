@@ -250,7 +250,7 @@ LootMItemEvaluator =( function()
         if (equippedValue > 0 and newValue > 0) then
             value =(newValue - equippedValue) / equippedValue;
             value = math.max(0, value);
-            value = math.floor(value * 100);
+            value = math.floor(value * 200); -- 2x the % value
         end
         return value;
     end
@@ -276,7 +276,7 @@ LootMItemEvaluator =( function()
             local equippedValue = getItemValue(playerItems[1], statWeights);
             improvementRating = getItemImprovementRating(equippedValue, (new * 2));
         end
-        return math.max(0, improvementRating);
+        return math.min(99, math.max(0, improvementRating)); -- capped between 0 and 99
     end
 
     return {
@@ -341,8 +341,13 @@ end
 
 -- TODO: Accordian loot items (?)
 -- edit stat weights
+-- Roll count
+-- Recieve rolls via tell
+-- Broadcast loot via tells to non-addon clients
+-- consider resizing client
 -- prevent need on non-usable items
 -- assign loot
+-- display player role (healer/tank/dps)
 -- spirit only to healers, bonus armor only to tanks
 -- Improvement ratings on trinkets?
 
