@@ -113,7 +113,7 @@ LootMItemEvaluator =( function()
     };
 
     local function getPlayerInventoryItem(slotId)
-        GetInventoryItemLink('player', slotId)
+        return GetInventoryItemLink('player', slotId);
     end
     -- the premis on thsi one is that a token is misc/junk with specific textures for each slot
     -- as long as the game keeps that, we can assume these will be tokens
@@ -127,10 +127,11 @@ LootMItemEvaluator =( function()
         local playerItems={};
         local lootItemType, playerItemType;
         local mainHandSlot, offHandSlot = 16, 17;
-        local offHandItem = getPlayerInventoryItem(offHandSlot);
 
         if (offHandItems[itemEquipLocation]) then -- is the looted item an offhand?
             lootItemType = offHandItemType;
+            local offHandItem = getPlayerInventoryItem(offHandSlot);
+
             if (not offHandItem) then -- loot item is an offhand, but equipped 2 hander
                 playerItemType = twoHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
@@ -140,6 +141,8 @@ LootMItemEvaluator =( function()
             end
         elseif (oneHandItems[itemEquipLocation]) then -- is the looted item a one hander?
             lootItemType = oneHandItemType;
+            local offHandItem = getPlayerInventoryItem(offHandSlot);
+
             if (not offHandItem) then -- looted item is 1h but have equipped a 2h
                 playerItemType = twoHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
@@ -150,6 +153,8 @@ LootMItemEvaluator =( function()
             end
         elseif (twoHandItems[itemEquipLocation]) then -- is the looted item a two hander?
             lootItemType = twoHandItemType;
+            local offHandItem = getPlayerInventoryItem(offHandSlot);
+
             if (not offHandItem) then -- loot item is 2h and has equipped a 2h
                 playerItemType = twoHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
@@ -200,9 +205,9 @@ LootMItemEvaluator =( function()
     local function getItemValue(itemLink, weightTable)
         local itemStats = GetItemStats(itemLink);
         local itemValue = 0;
-        for k, v in pairs(statTable) do
+        for k, v in pairs(itemStats) do
             local weight = weightTable[k];
-            if (weight and weight >= 0) then
+            if (weight and weight > 0) then
                 itemValue = itemValue +(v * weight);
             end
         end
@@ -214,7 +219,7 @@ LootMItemEvaluator =( function()
         if (equippedValue > 0 and newValue > 0) then
             value =(newValue - equippedValue) / equippedValue;
             value = math.max(0, value);
-            value = value * 100;
+            value = math.floor(value * 100);
         end
         return value;
     end
@@ -228,17 +233,17 @@ LootMItemEvaluator =( function()
         if (not lootItemType or (lootItemType == playerItemType)) then
             for k, v in pairs(playerItems) do
                 local old = getItemValue(v, statWeights);
-                improvementRating = math.max(getImprovementRating(old, new), improvementRating);
+                improvementRating = math.max(getItemImprovementRating(old, new), improvementRating);
             end
         elseif (lootItemType == twoHandItemType) then -- not the same, so player type is 1 or offhand
             local equippedValue = 
                 getItemValue(playerItems[1], statWeights) +
                 getItemValue(playerItems[2], statWeights); -- add the value of both equipped weapons to compare against 2h
-            improvementRating = getImprovementRating(equippedValue, new);
+            improvementRating = getItemImprovementRating(equippedValue, new);
         elseif (lootItemType == oneHandItemtype or lootItemType == offHandItemType) then
             -- player should have a 2h
             local equippedValue = getItemValue(playerItems[1], statWeights);
-            improvementRating = getImprovementRating(equippedValue, (new * 2));
+            improvementRating = getItemImprovementRating(equippedValue, (new * 2));
         end
         return math.max(0, improvementRating);
     end
@@ -251,7 +256,7 @@ LootMItemEvaluator =( function()
             -- TODO: Grab a stat weight table appropreate for the player
             local improvementRating = 
                 calculateImprovementRating(itemLink, playerItems, LootMStatWeights[1], lootItemType, playerItemType);
-            return playerItems, improvementRating;
+            return { PlayerItems = playerItems, ImprovementRaiting = improvementRating };
         end,
         GetItemValue = function(itemLink, weightTable)
             return getItemValue(itemLink, weightTable);
@@ -304,9 +309,7 @@ end
 
 
 -- TODO: Accordian loot items (?)
--- add stat weights into comparison (left is to propegate to display)
 -- edit stat weights
--- prevent more than one change in loot choice
 -- prevent need on non-usable items
 -- assign loot
 -- reset loot session (loot master button)

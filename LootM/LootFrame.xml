@@ -171,6 +171,13 @@
             </Anchor>
           </Anchors>
         </FontString>
+        <FontString parentKey="ImprovementRating" inherits="GameFontHighlightSmall" justifyH="LEFT">
+          <Anchors>
+            <Anchor point="LEFT">
+              <Offset x="280" y="0" />
+            </Anchor>
+          </Anchors>
+        </FontString>
       </Layer>
     </Layers>
     <Frames>

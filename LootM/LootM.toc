@@ -9,3 +9,4 @@
 LootM.lua
 LootFrame.xml
 LootMComms.lua
+LootMStatWeights.lua

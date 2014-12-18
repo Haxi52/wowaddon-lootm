@@ -17,9 +17,8 @@ LootMComms =( function()
             newLootMessageSpool = {};
             return;
         end
-
         local i =0;
-        for i in pairs(newLootMessageSpool) do
+        for x in pairs(newLootMessageSpool) do
             i = i + 1;
         end
         if (i ~= itemCount) then
@@ -28,7 +27,8 @@ LootMComms =( function()
 
         LootMItemEntries.Hide();
         for k,itemLink in pairs(newLootMessageSpool) do
-            LootMItemEntries.ShowItem(itemLink);    
+            local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(itemLink);
+            LootMItemEntries.ShowItem(itemLink, playerDetails);    
         end    
         LootMItemEntries.Show();
         print('[LootM] Staring new loot session. Take a gandar');
@@ -40,16 +40,17 @@ LootMComms =( function()
     local chatMessageHandlers = {
         [newLootPrefix] = function(message, sender)
             local parsedMessage = {};
-            for i in string.gmatch("([^;]+)") do
+            for i in string.gmatch(message, "([^;]+)") do
                 table.insert(parsedMessage, i);
             end
             local messageCount, messageIndex, itemLink = unpack(parsedMessage);
+            messageCount, messageIndex = tonumber(messageCount), tonumber(messageIndex);
             if (newLootMessageSpool[messageIndex]) then
                 -- this shoudnt happen
                 newLootMessageSpool = {};
             end
 
-            -- if the item is not loaded, pend the message untill the server can get us info about the item
+            -- if the item is not loaded, pend the message until the server can get us info about the item
             if (not GetItemInfo(itemLink)) then
                 table.insert(pendingMessages,
                 {
@@ -61,11 +62,11 @@ LootMComms =( function()
             end
 
             newLootMessageSpool[messageIndex] = itemLink;
-            processNewLootMessage(messsageCount);
+            processNewLootMessage(messageCount);
         end,
         [rollPrefix] = function(message, sender)
             local parsedMessage = {};
-            for i in string.gmatch("([^;]+)") do
+            for i in string.gmatch(message, "([^;]+)") do
                 table.insert(parsedMessage, i);
             end
             local rollId, itemLink, improvementRating, playerItems = (function(a, b, c, ...)
@@ -132,13 +133,11 @@ LootMComms =( function()
         end,
 
         -- singles a player's roll selection on a item being looted
-        Roll = function(rollId, itemLink, playerItems, improvementRating)
+        Roll = function(rollId, itemLink, playerDetails)
 
-            local message = { rollId, itemLink, improvementRating };
-            if (playerItems) then
-                for k,v in pairs(playerItems) do
-                    table.insert(message, v);
-                end
+            local message = { rollId, itemLink, playerDetails.ImprovementRaiting };
+            for k,v in pairs(playerDetails.PlayerItems) do
+                table.insert(message, v);
             end
             -- [rollid];[item being rolled on];[improvementrating];[table...of player equipped items]
             SendAddonMessage(rollPrefix, table.concat(message, ';'), raidMessageType);
