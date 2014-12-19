@@ -1,24 +1,36 @@
 local maxRollChances = 2;
-
+local maxPlayerRollShown = 5;
 local rollTextures = {
     ['0'] = 'Interface\\Buttons\\UI-GroupLoot-Pass-Up',
     ['1'] = 'Interface\\Buttons\\UI-GroupLoot-Dice-Up',
     ['2'] = 'Interface\\Buttons\\UI-GroupLoot-Coin-Up',
 };
 
+local roleCoords = {
+    ['TANK'] =   {0,       0.3125,  0.3125, 0.625},
+    ['HEALER'] = {0.3125,  0.625,   0,      0.3125},
+    ['DAMAGER'] ={0.3125,  0.625,   0.3125, 0.625},
+    ['other'] =  {0,       0.3125,  0,      0.3125},
+};
+
 local LootItemEntryFactory;
 LootMItemEntries = {};
 
 -- closure of player frame (each player listed under the loot item)
-local playerFrameFactory = function (parent, index, playerName, rollId, itemsTable, improvementRating)
+local playerFrameFactory = function (parent, index, playerName, role, rollId, itemsTable, improvementRating)
     local indexOffset = 22;
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
     local isShown = true;
     local equippedItemLevel = 1000;
 
     local function setAnchor()
-        frame:ClearAllPoints();
-        frame:SetPoint("TOPLEFT", parent.ItemDetails, "BOTTOMLEFT", 10, -((index - 1) * indexOffset));
+        if (index > maxPlayerRollShown) then 
+            frame:Hide(); 
+        elseif (isShown) then
+            frame:ClearAllPoints();
+            frame:SetPoint("TOPLEFT", parent.ItemDetails, "BOTTOMLEFT", 10, -((index - 1) * indexOffset));
+            frame:Show(); 
+        end
     end;
 
     local function setItemFrame(itemId, button)
@@ -38,11 +50,12 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
         frame.PlayerName:SetText(playerName);
         frame.RollTexture:SetTexture(rollTextures[rollId]);
         frame.ImprovementRating:SetText('['..improvementRating..']');
+        frame.RoleTexture:SetTexCoord(unpack((roleCoords[role] or roleCoords['other'])));
         equippedItemLevel = 1000;
         setItemFrame(itemsTable[1], frame.EquippedItem1);
         setItemFrame(itemsTable[2], frame.EquippedItem2);
         
-        frame:Show();
+        if (index < maxPlayerRollShown) then frame:Show(); end
         isShown = true;
     end;
 
@@ -61,15 +74,19 @@ local playerFrameFactory = function (parent, index, playerName, rollId, itemsTab
             index = i;
             setAnchor();
         end,
-        SetRoll = function (r, i, imp) 
+        -- role, rollId, item table, improvement rating
+        SetRoll = function (s, r, i, imp) 
+            role = s;
             rollId = r; 
             itemsTable = i;
             improvementRating = imp;
             updateFrame();
         end,
-        Update = function (player, r, i, imp) 
+        -- player name, role, rollId, item table, improvement rating
+        Update = function (player, s, r, i, imp) 
             rollId = r;
             playerName = player;
+            role = s;
             itemsTable = i;
             improvementRating = imp;
             updateFrame();
@@ -119,6 +136,8 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         local thisItemType, thisItemSubType;
         if (itemSubType == 'Miscellaneous') then
             thisItemType = _G[itemEquipLocation];
+        elseif (itemType == 'Weapon') then
+            thisItemType = itemSubType;
         else
             thisItemType = itemSubType;
             thisItemSubType = _G[itemEquipLocation];
@@ -147,6 +166,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
                 playerCount = playerCount +1;
             end
         end;
+        playerCount = math.min(playerCount, maxPlayerRollShown);
         frame:SetHeight((playerCount * 22) + defaultFrameHeight);
     end;
 
@@ -186,23 +206,23 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
             isShown = false; 
         end,
         GetFrame = function () return frame; end,
-        SetPlayerRoll = function (player, rollId, itemsTable, improvementRating)
+        SetPlayerRoll = function (player, role, rollId, itemsTable, improvementRating)
             local index = 1;
             for k,v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
-                    v.SetRoll(rollId, itemsTable, improvementRating);
+                    v.SetRoll(role, rollId, itemsTable, improvementRating);
                     sortPlayerTable();
                     updateHeight();
                     return;
                 elseif (not v.IsShown()) then
-                    v.Update(player, rollId, itemsTable, improvementRating);
+                    v.Update(player, role, rollId, itemsTable, improvementRating);
                     sortPlayerTable();
                     updateHeight();
                     return;
                 end
                 index = index +1;
             end
-            table.insert(playerFrames, playerFrameFactory(frame, index, player, rollId, itemsTable, improvementRating));
+            table.insert(playerFrames, playerFrameFactory(frame, index, player, role, rollId, itemsTable, improvementRating));
             sortPlayerTable();
             updateHeight();
         end,
@@ -243,10 +263,10 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 end
                 return output;
             end,
-            SetPlayerRoll = function (itemLink, player, rollId, itemsTable, improvementRating)
+            SetPlayerRoll = function (itemLink, player, role, rollId, itemsTable, improvementRating)
                 for k,v in pairs(itemEntries) do
                     if (v.GetItemLink() == itemLink) then
-                        v.SetPlayerRoll(player, rollId, itemsTable, improvementRating);
+                        v.SetPlayerRoll(player, role, rollId,  itemsTable, improvementRating);
                     end
                 end
             end,

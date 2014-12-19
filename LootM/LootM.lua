@@ -9,16 +9,16 @@ LootM = CreateFrame("FRAME", "LootM"), { };
 LootMFrames["LootM"] = LootM;
 
 LootM.Update = function ()
-    print('updated');
+    local resetButton = LootMFrames["LootMLootFrame"].ResetButton;
     if (LootM.IsLootMaster()) then
-        LootMFrames["LootMLootFrame"].ResetButton:Show();
+        resetButton:Show();
     else
-        LootM.ResetButton:Hide();
+        resetButton:Hide();
     end
 end
 
 function LootMEvents:LOOT_OPENED(...)
-    --if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
+    if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = LootM.GetLootItems();
     if (LootMItemEntries.IsNewLoot(lootTable)) then
         LootMComms.NewLoot(lootTable);
@@ -48,7 +48,6 @@ LootM:SetScript("OnEvent", function(self, event, ...)
     LootMEvents[event](self, ...);
 end );
 LootM:SetScript("OnLoad", LootM.Update);
-
 
 for k, v in pairs(LootMEvents) do
     LootM:RegisterEvent(k);
@@ -300,16 +299,27 @@ end )();
 -- /lootm
 SLASH_LOOTM1 = '/lootm';
 SlashCmdList["LOOTM"] = function(message)
+    local rollType, name;
     if (string.sub(message, 1, 4) == 'test') then
         LootMComms.NewLoot( { string.sub(message, 5) });
     elseif (string.sub(message, 1, 4) == 'need') then
-        local x = LootMItemEntries.GetItems();
-        LootMItemEntries.SetPlayerRoll(x[1], 'TheNewGuy', '1', LootMItemEvaluator.GetPlayerItemDetails(x[1]));
+        name = string.sub(message, 6);
+        rollType = '1';
     elseif (string.sub(message, 1, 4) == 'gree') then
-        local x = LootMItemEntries.GetItems();
-        LootMItemEntries.SetPlayerRoll(x[1], 'TheNewGuy', '2', LootMItemEvaluator.GetPlayerItemDetails(x[1]));
+        name = string.sub(message, 7);
+        rollType = '2';
     else
         LootMItemEntries.Show();
+    end
+
+    if (rollType) then
+        local x = LootMItemEntries.GetItems();
+        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
+        LootMItemEntries.SetPlayerRoll(x[1], 
+            name or 'TheNewGuy', 
+            'DAMAGER', rollType, 
+            playerDetails.PlayerItems,
+            playerDetails.ImprovementRaiting);
     end
 end;
 
@@ -341,14 +351,11 @@ end
 
 -- TODO: Accordian loot items (?)
 -- edit stat weights
--- Roll count
 -- Recieve rolls via tell
 -- Broadcast loot via tells to non-addon clients
--- consider resizing client
--- prevent need on non-usable items
+-- prevent need on non-usable items (Encounter Journal)
 -- assign loot
--- display player role (healer/tank/dps)
--- spirit only to healers, bonus armor only to tanks
+-- spirit only to healers, bonus armor only to tanks (Encounter journal)
 -- Improvement ratings on trinkets?
 
 -- for debugging

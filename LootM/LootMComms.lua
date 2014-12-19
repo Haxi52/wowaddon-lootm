@@ -69,8 +69,8 @@ LootMComms =( function()
             for i in string.gmatch(message, "([^;]+)") do
                 table.insert(parsedMessage, i);
             end
-            local rollId, itemLink, improvementRating, playerItems = (function(a, b, c, ...)
-                return a,b,c,{...};
+            local rollId, role, itemLink, improvementRating, playerItems = (function(a, b, c, d, ...)
+                return a,b,c,d,{...};
             end)(unpack(parsedMessage));
 
             -- We are not short-circuting this logic because we want to make sure all
@@ -92,7 +92,7 @@ LootMComms =( function()
                 return;
             end
 
-            LootMItemEntries.SetPlayerRoll(itemLink, sender, rollId, playerItems, improvementRating);
+            LootMItemEntries.SetPlayerRoll(itemLink, sender, role, rollId, playerItems, improvementRating);
         end,
         [awardPrefix] = function(message, sender) return; end,
     };
@@ -134,8 +134,8 @@ LootMComms =( function()
 
         -- singles a player's roll selection on a item being looted
         Roll = function(rollId, itemLink, playerDetails)
-
-            local message = { rollId, itemLink, playerDetails.ImprovementRaiting };
+            local role = GetSpecializationRole(GetActiveSpecGroup());
+            local message = { rollId, role, itemLink, playerDetails.ImprovementRaiting };
             for k,v in pairs(playerDetails.PlayerItems) do
                 table.insert(message, v);
             end

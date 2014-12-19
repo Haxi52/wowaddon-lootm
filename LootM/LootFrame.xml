@@ -3,13 +3,13 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML.old\UI.xsd">
   <Script file="LootFrame.lua" />
   <Button name="ItemEntryDetailsTemplate" virtual="true">
-    <Size x="414" y="52"/>
+    <Size x="314" y="52"/>
     <Anchors>
       <Anchor point="TOPLEFT" />
     </Anchors>
     <Frames>
-      <Button parentKey="ItemDetails" enableMouse="true">
-        <Size x="414" y="52"/>
+      <Button parentKey="ItemDetails">
+        <Size x="314" y="52"/>
         <Anchors>
           <Anchor point="TOPLEFT" />
         </Anchors>
@@ -36,7 +36,7 @@
               <Size x="48" y="48" />
             </Texture>
             <FontString text="this is some text" inherits="GameFontNormal" parentKey="ItemName" justifyH="LEFT">
-              <Size x="200" y="20" />
+              <Size x="120" y="20" />
               <Anchors>
                 <Anchor point="LEFT" relativePoint="LEFT">
                   <Offset x="55" y="10"/>
@@ -52,18 +52,18 @@
               </Anchors>
             </FontString>
             <FontString text="this is some text" inherits="GameFontHighlightSmall" parentKey="ItemType" justifyH="LEFT">
-              <Size x="100" y="20" />
+              <Size x="90" y="20" />
               <Anchors>
                 <Anchor point="LEFT" relativePoint="LEFT">
-                  <Offset x="90" y="-10"/>
+                  <Offset x="84" y="-10"/>
                 </Anchor>
               </Anchors>
             </FontString>
             <FontString text="this is some text" inherits="GameFontHighlightSmall" parentKey="ItemSubType" justifyH="LEFT">
-              <Size x="100" y="20" />
+              <Size x="75" y="20" />
               <Anchors>
                 <Anchor point="LEFT" relativePoint="LEFT">
-                  <Offset x="180" y="-10"/>
+                  <Offset x="130" y="-10"/>
                 </Anchor>
               </Anchors>
             </FontString>
@@ -89,9 +89,7 @@
           <Button inherits="LootRollButtonTemplate" parentKey="needButton" id="1">
             <Anchors>
               <Anchor point="TOPRIGHT">
-                <Offset>
-                  <AbsDimension x="-120" y="-14"/>
-                </Offset>
+                <Offset x="-108" y="-14"/>
               </Anchor>
             </Anchors>
             <Scripts>
@@ -106,9 +104,7 @@
           <Button  inherits="LootRollButtonTemplate" parentKey="greedButton" id="2">
             <Anchors>
               <Anchor point="TOPRIGHT">
-                <Offset>
-                  <AbsDimension x="-88" y="-14"/>
-                </Offset>
+                <Offset x="-78" y="-14"/>
               </Anchor>
             </Anchors>
             <Scripts>
@@ -123,9 +119,7 @@
           <Button inherits="LootRollButtonTemplate" parentKey="passButton" id="0">
             <Anchors>
               <Anchor point="TOPRIGHT">
-                <Offset>
-                  <AbsDimension x="-55" y="-10"/>
-                </Offset>
+                <Offset x="-48" y="-10"/>
               </Anchor>
             </Anchors>
             <Scripts>
@@ -154,7 +148,7 @@
     </Frames>
   </Button>
   <Button name="PlayerRollDetail" virtual="true">
-    <Size x="400" y="20" />
+    <Size x="300" y="20" />
     <Layers>
       <Layer>
         <Texture parentKey="RollTexture" file="Interface\Buttons\UI-GroupLoot-Dice-Up">
@@ -163,11 +157,20 @@
             <Anchor point="LEFT" />
           </Anchors>
         </Texture>
-        <FontString parentKey="PlayerName" inherits="GameFontNormal" justifyH="LEFT">
-          <Size x="150" y="20" />
+        <Texture parentKey="RoleTexture" file="Interface\LFGFrame\UI-LFG-ICON-PORTRAITROLES">
+          <Size x="16" y="16" />
           <Anchors>
             <Anchor point="LEFT">
-              <Offset x="20" y="0" />
+              <Offset x="20" />
+            </Anchor>
+          </Anchors>
+          <TexCoords left="0.3125" right="0.625" top="0" bottom="0.3125"/>
+        </Texture>
+        <FontString parentKey="PlayerName" inherits="GameFontNormal" justifyH="LEFT">
+          <Size x="120" y="20" />
+          <Anchors>
+            <Anchor point="LEFT">
+              <Offset x="40" y="0" />
             </Anchor>
           </Anchors>
         </FontString>
@@ -251,7 +254,7 @@
   </Button>
   <Frame name="LootMLootFrame" parent="UIParent" hidden="true" toplevel="true" movable="true">
     <Size>
-      <AbsDimension x="450" y="400" />
+      <AbsDimension x="350" y="400" />
     </Size>
     <Anchors>
       <Anchor point="CENTER" />
