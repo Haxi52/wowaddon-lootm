@@ -1,5 +1,6 @@
 local maxRollChances = 2;
 local maxPlayerRollShown = 5;
+
 local rollTextures = {
     ['0'] = 'Interface\\Buttons\\UI-GroupLoot-Pass-Up',
     ['1'] = 'Interface\\Buttons\\UI-GroupLoot-Dice-Up',
@@ -286,4 +287,16 @@ function LootMEvents.LootMLootFrame_OnLoad()
         };
     end)();
 
+    StaticPopupDialogs[ConfirmLootAwardDialg] = {
+      text = "Are you sure you wish to award %s to %s",
+      button1 = ACCEPT,
+      button2 = CANCEL,
+      OnAccept = function(self, data)
+          if (type(data) == 'function') then data(); end
+      end,
+      timeout = 0,
+      whileDead = true,
+      hideOnEscape = true,
+      preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    };
 end

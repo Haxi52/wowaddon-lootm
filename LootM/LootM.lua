@@ -1,5 +1,7 @@
 seterrorhandler(print);
 
+ConfirmLootAwardDialg = 'LootM_ConfirmAwardLoot';
+
 LootMFrames = { };
 LootMEvents = { };
 LootMItemEvaluator = { };
@@ -81,6 +83,18 @@ LootM.ResetLoot = function ()
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = LootM.GetLootItems();
     LootMComms.NewLoot(lootTable);
+end
+
+LootM.AwardLoot = function(playerName, itemLink)
+    local awardLoot = function () 
+        -- for debugging
+        print('awarding '..itemLink..' to '..playerName);
+    end;
+
+    local dialog = StaticPopup_Show(ConfirmLootAwardDialg, itemLink, playerName)
+    if (dialog) then
+        dialog.data = awardLoot;
+    end
 end
 
 function RegisterFrame(frame)
