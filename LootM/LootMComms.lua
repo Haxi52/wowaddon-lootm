@@ -145,7 +145,7 @@ LootMComms =( function()
         -- TODO: Implement award
         Award = function(itemLink, awardee) return; end,
         MessageRecieved = chatMessageEvent,-- proxy to publically expose the handler
-        ItemsLoaded = ItemsLoaded, -- proxy for even when item data is received from server
+        ItemsLoaded = itemsLoaded, -- proxy for even when item data is received from server
     };
 
 end )();
