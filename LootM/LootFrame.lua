@@ -161,7 +161,6 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         for k,v in pairs(playerFrames) do
             rollCount[v.GetRoll()] = (rollCount[v.GetRoll()] or 0) +1;
         end
-        PrintTable(rollCount);
         frame.ItemDetails.needButton.Label:SetText(rollCount['1']);
         frame.ItemDetails.greedButton.Label:SetText(rollCount['2']);
         frame.ItemDetails.passButton.Label:SetText(rollCount['0']);

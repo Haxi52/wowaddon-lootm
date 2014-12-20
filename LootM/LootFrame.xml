@@ -304,16 +304,44 @@
       </EdgeSize>
     </Backdrop>
     <Frames>
+      <Frame name="header" enableMouse="true" frameLevel="4">
+        <Anchors>
+          <Anchor point="TOP">
+            <Offset y="18" />
+          </Anchor>
+        </Anchors>
+        <Size x="225" y="55" />
+        <Layers>
+          <Layer level="BACKGROUND">
+            <Texture file="Interface\DialogFrame\UI-DialogBox-Header" />
+            <FontString inherits="GameFontNormal" text="LootM" justifyH="CENTER" justifyV="MIDDLE">
+              <Anchors>
+                <Anchor point="CENTER">
+                  <Offset y="10"/>
+                </Anchor>
+              </Anchors>
+              <Size x="200" y="20"/>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnLoad>
+            self:RegisterForDrag("LeftButton");
+          </OnLoad>
+          <OnDragStart>self:GetParent():StartMoving();</OnDragStart>
+          <OnDragStop>self:GetParent():StopMovingOrSizing();</OnDragStop>
+        </Scripts>
+      </Frame>
       <Button inherits="UIPanelCloseButton">
         <Anchors>
           <Anchor point="TOPRIGHT">
           </Anchor>
         </Anchors>
       </Button>
-      <Button inherits="UIPanelButtonTemplate" text="Reset" parentKey="ResetButton" hidden="true">
+      <Button inherits="UIPanelButtonTemplate" text="Reset" parentKey="ResetButton" hidden="true" frameLevel="5">
         <Anchors>
           <Anchor point="TOPLEFT">
-            <Offset x="20" y="20" />
+            <Offset x="17" y="20" />
           </Anchor>
         </Anchors>
         <Size x="100" y="25" />

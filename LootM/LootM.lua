@@ -12,11 +12,11 @@ LootMFrames["LootM"] = LootM;
 
 LootM.Update = function ()
     local resetButton = LootMFrames["LootMLootFrame"].ResetButton;
-    if (LootM.IsLootMaster()) then
+--    if (LootM.IsLootMaster()) then
         resetButton:Show();
-    else
-        resetButton:Hide();
-    end
+--    else
+--        resetButton:Hide();
+--    end
 end
 
 function LootMEvents:LOOT_OPENED(...)
