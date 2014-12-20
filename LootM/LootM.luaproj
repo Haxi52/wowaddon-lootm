@@ -40,6 +40,7 @@
   <ItemGroup>
     <Content Include="LootFrame.xml" />
     <Content Include="LootM.toc" />
+    <Content Include="LootMStatWeights.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
 </Project>

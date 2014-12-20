@@ -12,11 +12,28 @@ LootMFrames["LootM"] = LootM;
 
 LootM.Update = function ()
     local resetButton = LootMFrames["LootMLootFrame"].ResetButton;
---    if (LootM.IsLootMaster()) then
+    if (LootM.IsLootMaster()) then
         resetButton:Show();
---    else
---        resetButton:Hide();
---    end
+    else
+        resetButton:Hide();
+    end
+end
+
+LootM.Init = function ()
+    StaticPopupDialogs[ConfirmLootAwardDialg] = {
+      text = "Are you sure you wish to award %s to %s",
+      button1 = ACCEPT,
+      button2 = CANCEL,
+      OnAccept = function(self, data)
+          if (type(data) == 'function') then data(); end
+      end,
+      timeout = 0,
+      whileDead = true,
+      hideOnEscape = true,
+      preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+    };
+
+    LootM.Update();
 end
 
 function LootMEvents:LOOT_OPENED(...)
@@ -44,6 +61,13 @@ function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
 end
 function LootMEvents:CHAT_MSG_ADDON(...)
     LootMComms.MessageRecieved(...);
+end
+
+function LootMEvents:ADDON_LOADED(...)
+    LootM.Init();
+end
+function LootMEvents:PLAYER_LOOT_SPEC_UPDATED(...)
+    LootM.UpdateConfig();
 end
 
 LootM:SetScript("OnEvent", function(self, event, ...)
@@ -285,7 +309,7 @@ LootMItemEvaluator =( function()
         if (equippedValue > 0 and newValue > 0) then
             value =(newValue - equippedValue) / equippedValue;
             value = math.max(0, value);
-            value = math.floor(value * 200); -- 2x the % value
+            value = math.floor(value * 100); -- 2x the % value
         end
         return value;
     end
@@ -321,7 +345,7 @@ LootMItemEvaluator =( function()
             -- calculate an improvement rating agaist the player equipped items
             -- TODO: Grab a stat weight table appropreate for the player
             local improvementRating = 
-                calculateImprovementRating(itemLink, playerItems, LootMStatWeights[1], lootItemType, playerItemType);
+                calculateImprovementRating(itemLink, playerItems, LootM.GetPlayerStatWeights(), lootItemType, playerItemType);
             return { PlayerItems = playerItems, ImprovementRaiting = improvementRating };
         end,
         GetItemValue = function(itemLink, weightTable)
@@ -336,7 +360,9 @@ end )();
 SLASH_LOOTM1 = '/lootm';
 SlashCmdList["LOOTM"] = function(message)
     local rollType, name;
-    if (string.sub(message, 1, 4) == 'test') then
+    if (string.sub(message, 1, 6) == 'config') then
+        LootM.ShowConfig();
+    elseif (string.sub(message, 1, 4) == 'test') then
         LootMComms.NewLoot( { string.sub(message, 5) });
     elseif (string.sub(message, 1, 4) == 'need') then
         name = string.sub(message, 6);

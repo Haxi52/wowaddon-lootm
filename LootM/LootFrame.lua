@@ -290,7 +290,6 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
 end
 
 function LootMEvents.LootMLootFrame_OnLoad()
-    LootM.Update();
     -- the main collection of loot items
     LootMItemEntries = (function () 
         local itemEntries = {};
@@ -353,17 +352,4 @@ function LootMEvents.LootMLootFrame_OnLoad()
             end
         };
     end)();
-
-    StaticPopupDialogs[ConfirmLootAwardDialg] = {
-      text = "Are you sure you wish to award %s to %s",
-      button1 = ACCEPT,
-      button2 = CANCEL,
-      OnAccept = function(self, data)
-          if (type(data) == 'function') then data(); end
-      end,
-      timeout = 0,
-      whileDead = true,
-      hideOnEscape = true,
-      preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
-    };
 end

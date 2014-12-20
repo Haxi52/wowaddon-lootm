@@ -5,8 +5,9 @@
 ## Notes: Loot addon for <Rated M>
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
+## SavedVariables: LootMStatWeights
 
 LootM.lua
 LootFrame.xml
 LootMComms.lua
-LootMStatWeights.lua
+LootMStatWeights.xml
