@@ -94,7 +94,15 @@ LootMComms =( function()
 
             LootMItemEntries.SetPlayerRoll(itemLink, sender, role, rollId, playerItems, improvementRating);
         end,
-        [awardPrefix] = function(message, sender) return; end,
+        [awardPrefix] = function(message, sender) 
+            local parsedMessage = {};
+            for i in string.gmatch(message, "([^;]+)") do
+                table.insert(parsedMessage, i);
+            end
+            local awardee, itemLink = unpack(parsedMessage);
+            LootMItemEntries.AwardItem(itemLink, awardee);
+            print(awardee..' was awarded '..itemLink);
+        end,
     };
 
     -- main event handler which dispatches the message to a handler based on prefix
@@ -142,8 +150,10 @@ LootMComms =( function()
             -- [rollid];[item being rolled on];[improvementrating];[table...of player equipped items]
             SendAddonMessage(rollPrefix, table.concat(message, ';'), raidMessageType);
         end,
-        -- TODO: Implement award
-        Award = function(itemLink, awardee) return; end,
+        Award = function(itemLink, awardee) 
+            local message = { awardee, itemLink }
+            SendAddonMessage(awardPrefix, table.concat(message, ';'), raidMessageType);
+        end,
         MessageRecieved = chatMessageEvent,-- proxy to publically expose the handler
         ItemsLoaded = itemsLoaded, -- proxy for even when item data is received from server
     };

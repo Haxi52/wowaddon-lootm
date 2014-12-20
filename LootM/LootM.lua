@@ -86,9 +86,31 @@ LootM.ResetLoot = function ()
 end
 
 LootM.AwardLoot = function(playerName, itemLink)
+    if (not LootM.IsLootMaster()) then return; end
     local awardLoot = function () 
-        -- for debugging
-        print('awarding '..itemLink..' to '..playerName);
+        local lootIndex = 0;
+        for i = 1, GetNumLootItems() do
+            if (itemLink == GetLootSlotLink(i)) then
+                lootIndex = i;
+                break;
+            end
+        end
+        if (lootIndex == 0) then
+            print('[LootM] Unable to find loot item!');
+        end
+
+        for i = 1, 40 do
+            local candidate = GetMasterLootCandidate(lootIndex, i);
+            if (candidate == nil) then 
+                print('[LootM] Unable to find player to award loot!');
+                break; 
+            end
+            if (candidate == playerName) then
+                print('[LootM] Awarding '..itemLink..' to '..playerName);
+                GiveMasterLoot(lootIndex, i);  
+                LootMComms.Award(itemLink, playerName);   
+            end
+        end
     end;
 
     local dialog = StaticPopup_Show(ConfirmLootAwardDialg, itemLink, playerName)
@@ -322,6 +344,8 @@ SlashCmdList["LOOTM"] = function(message)
     elseif (string.sub(message, 1, 4) == 'gree') then
         name = string.sub(message, 7);
         rollType = '2';
+    elseif (string.sub(message, 1, 5) == 'award') then
+        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
     else
         LootMItemEntries.Show();
     end
@@ -368,7 +392,6 @@ end
 -- Recieve rolls via tell
 -- Broadcast loot via tells to non-addon clients
 -- prevent need on non-usable items (Encounter Journal)
--- assign loot
 -- spirit only to healers, bonus armor only to tanks (Encounter journal)
 -- Improvement ratings on trinkets?
 

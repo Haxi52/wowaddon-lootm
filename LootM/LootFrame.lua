@@ -5,6 +5,7 @@ local rollTextures = {
     ['0'] = 'Interface\\Buttons\\UI-GroupLoot-Pass-Up',
     ['1'] = 'Interface\\Buttons\\UI-GroupLoot-Dice-Up',
     ['2'] = 'Interface\\Buttons\\UI-GroupLoot-Coin-Up',
+    ['awarded'] = 'Interface\\RAIDFRAME\\ReadyCheck-Ready',
 };
 
 local roleCoords = {
@@ -23,6 +24,11 @@ local playerFrameFactory = function (parent, index, playerName, role, rollId, it
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
     local isShown = true;
     local equippedItemLevel = 1000;
+    local onClickCallback;
+
+    frame:SetScript("OnClick", function ()
+        onClickCallback(playerName);
+    end);
 
     local function setAnchor()
         if (index > maxPlayerRollShown) then 
@@ -94,6 +100,12 @@ local playerFrameFactory = function (parent, index, playerName, role, rollId, it
         end,
         Hide = function () isShown = false; frame:Hide(); end,
         GetFrame = function () return frame; end,
+        OnClick = function(callback)
+            onClickCallback = callback;
+        end,
+        SetAwarded = function ()
+            frame.RollTexture:SetTexture(rollTextures['awarded']);
+        end,
     };
 end;
 
@@ -108,19 +120,30 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     local playerFrames = {};
     local entryContainer = LootMFrames['LootMLootFrame'].ScrollFrame.ItemEntryContainer;
     local frame = CreateFrame('Button', nil, entryContainer, 'ItemEntryDetailsTemplate');
+
     if (previousEntry) then
         frame:SetPoint("TOPLEFT", previousEntry.GetFrame(), "BOTTOMLEFT");
     else
         frame:SetPoint("TOPLEFT", entryContainer, "TOPLEFT", 10, 0);
     end
     
+    local turnOffRollButtons = function () 
+        frame.ItemDetails.needButton:Hide();
+        frame.ItemDetails.greedButton:Hide();
+        frame.ItemDetails.passButton:Hide();
+    end
+
+    local turnOnRollButtons = function ()
+        frame.ItemDetails.needButton:Show();
+        frame.ItemDetails.greedButton:Show();
+        frame.ItemDetails.passButton:Show();
+    end
+
     local rollButtonClickHandler = function(self)
         LootMComms.Roll(self:GetID(), itemLink, PlayerDetails);
         rollChances = rollChances -1;
         if (rollChances <= 0) then
-            frame.ItemDetails.needButton:Hide();
-            frame.ItemDetails.greedButton:Hide();
-            frame.ItemDetails.passButton:Hide();
+            turnOffRollButtons();
         end;
     end;
 
@@ -186,6 +209,10 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         end
     end;
 
+    local function assignLootClicker(playername)
+        LootM.AwardLoot(playername, itemLink);
+    end
+
     return {
         GetItemLink = function () return itemLink; end,
         IsShown = function () return isShown; end,
@@ -194,9 +221,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
                 GetItemInfo(e);
             PlayerDetails = playerDetails;
             rollChances = maxRollChances;
-            frame.ItemDetails.needButton:Show();
-            frame.ItemDetails.greedButton:Show();
-            frame.ItemDetails.passButton:Show();
+            turnOnRollButtons();
             populateFrame();
             updateHeight();
             isShown = true;
@@ -223,9 +248,20 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
                 end
                 index = index +1;
             end
-            table.insert(playerFrames, playerFrameFactory(frame, index, player, role, rollId, itemsTable, improvementRating));
+            local newPlayerFrame = playerFrameFactory(frame, index, player, role, rollId, itemsTable, improvementRating);
+            table.insert(playerFrames, newPlayerFrame);
+            newPlayerFrame.OnClick(assignLootClicker);
             sortPlayerTable();
             updateHeight();
+        end,
+        AwardItem = function (player)
+            turnOffRollButtons();
+            for k,v in pairs(playerFrames) do
+                if (v.PlayerName() == player) then
+                    v.SetAwarded();
+                    return;
+                end
+            end
         end,
     };
 end
@@ -284,6 +320,14 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 end;
                 return false;
             end,
+            -- doesn't award the item, but updates the UI to show an item has been awarded
+            AwardItem = function (itemLink, player)
+                for k,v in pairs(itemEntries) do
+                    if (v.GetItemLink() == itemLink) then
+                        v.AwardItem(player);
+                    end
+                end
+            end
         };
     end)();
 
