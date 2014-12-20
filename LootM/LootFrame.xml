@@ -92,6 +92,16 @@
                 <Offset x="-108" y="-14"/>
               </Anchor>
             </Anchors>
+            <Layers>
+              <Layer>
+                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
+                  <Size x="15" y="15" />
+                  <Anchors>
+                    <Anchor point="BOTTOMRIGHT"/>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
             <Scripts>
               <OnLoad>
                 self.tooltipText="Main Spec";
@@ -107,6 +117,16 @@
                 <Offset x="-78" y="-14"/>
               </Anchor>
             </Anchors>
+            <Layers>
+              <Layer>
+                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
+                  <Size x="15" y="15" />
+                  <Anchors>
+                    <Anchor point="BOTTOMRIGHT"/>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
             <Scripts>
               <OnLoad>
                 self.tooltipText="Off Spec/Minor upgrade";
@@ -119,9 +139,21 @@
           <Button inherits="LootRollButtonTemplate" parentKey="passButton" id="0">
             <Anchors>
               <Anchor point="TOPRIGHT">
-                <Offset x="-48" y="-10"/>
+                <Offset x="-48" y="-12"/>
               </Anchor>
             </Anchors>
+            <Layers>
+              <Layer>
+                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
+                  <Size x="15" y="15" />
+                  <Anchors>
+                    <Anchor point="BOTTOMRIGHT">
+                      <Offset y="-2" />
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
             <Scripts>
               <OnLoad>
                 self.tooltipText="Pass";

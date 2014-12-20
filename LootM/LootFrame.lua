@@ -156,6 +156,17 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         end;
     end;
 
+    local updateRollCount = function ()
+        local rollCount = {};
+        for k,v in pairs(playerFrames) do
+            rollCount[v.GetRoll()] = (rollCount[v.GetRoll()] or 0) +1;
+        end
+        PrintTable(rollCount);
+        frame.ItemDetails.needButton.Label:SetText(rollCount['1']);
+        frame.ItemDetails.greedButton.Label:SetText(rollCount['2']);
+        frame.ItemDetails.passButton.Label:SetText(rollCount['0']);
+    end
+
     frame.ItemDetails.needButton:SetScript('OnClick', rollButtonClickHandler);
     frame.ItemDetails.greedButton:SetScript('OnClick', rollButtonClickHandler);
     frame.ItemDetails.passButton:SetScript('OnClick', rollButtonClickHandler);
@@ -185,7 +196,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         else
             frame.ItemDetails.ItemSubType:SetText('');
         end
-        
+        updateRollCount();
         -- TODO: disable need button when not usable;
         frame:Show();
     end;
@@ -242,17 +253,20 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         end,
         GetFrame = function () return frame; end,
         SetPlayerRoll = function (player, role, rollId, itemsTable, improvementRating)
+            
             local index = 1;
             for k,v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
                     v.SetRoll(role, rollId, itemsTable, improvementRating);
                     sortPlayerTable();
                     updateHeight();
+                    updateRollCount();
                     return;
                 elseif (not v.IsShown()) then
                     v.Update(player, role, rollId, itemsTable, improvementRating);
                     sortPlayerTable();
                     updateHeight();
+                    updateRollCount();
                     return;
                 end
                 index = index +1;
@@ -262,6 +276,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
             newPlayerFrame.OnClick(assignLootClicker);
             sortPlayerTable();
             updateHeight();
+            updateRollCount();
         end,
         AwardItem = function (player)
             turnOffRollButtons();
