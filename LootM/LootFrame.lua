@@ -120,23 +120,32 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     local playerFrames = {};
     local entryContainer = LootMFrames['LootMLootFrame'].ScrollFrame.ItemEntryContainer;
     local frame = CreateFrame('Button', nil, entryContainer, 'ItemEntryDetailsTemplate');
-
+    local rollButtons = { frame.ItemDetails.needButton, frame.ItemDetails.greedButton, frame.ItemDetails.passButton };
     if (previousEntry) then
         frame:SetPoint("TOPLEFT", previousEntry.GetFrame(), "BOTTOMLEFT");
     else
         frame:SetPoint("TOPLEFT", entryContainer, "TOPLEFT", 10, 0);
     end
     
+    local function ForEachRollButton(f) 
+        for k,button in pairs(rollButtons) do f(button) end;
+    end
     local turnOffRollButtons = function () 
-        frame.ItemDetails.needButton:Hide();
-        frame.ItemDetails.greedButton:Hide();
-        frame.ItemDetails.passButton:Hide();
+        ForEachRollButton(function (b) 
+            b:GetNormalTexture():SetDesaturated(true);
+            b:GetHighlightTexture():SetDesaturated(true);
+            b:GetPushedTexture():SetDesaturated(true);
+            b:Disable();
+        end);
     end
 
     local turnOnRollButtons = function ()
-        frame.ItemDetails.needButton:Show();
-        frame.ItemDetails.greedButton:Show();
-        frame.ItemDetails.passButton:Show();
+        ForEachRollButton(function (b) 
+            b:Enable();
+            b:GetNormalTexture():SetDesaturated(false);
+            b:GetHighlightTexture():SetDesaturated(false);
+            b:GetPushedTexture():SetDesaturated(false);
+        end);
     end
 
     local rollButtonClickHandler = function(self)

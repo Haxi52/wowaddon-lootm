@@ -388,6 +388,7 @@ end
 
 
 -- TODO: Accordian loot items (?)
+-- Roll counters
 -- edit stat weights
 -- Recieve rolls via tell
 -- Broadcast loot via tells to non-addon clients
