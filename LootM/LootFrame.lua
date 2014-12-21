@@ -9,35 +9,35 @@ local rollTextures = {
 };
 
 local roleCoords = {
-    ['TANK'] =   {0,       0.3125,  0.3125, 0.625},
-    ['HEALER'] = {0.3125,  0.625,   0,      0.3125},
-    ['DAMAGER'] ={0.3125,  0.625,   0.3125, 0.625},
-    ['other'] =  {0,       0.3125,  0,      0.3125},
+    ['TANK'] = { 0, 0.3125, 0.3125, 0.625 },
+    ['HEALER'] = { 0.3125, 0.625, 0, 0.3125 },
+    ['DAMAGER'] = { 0.3125, 0.625, 0.3125, 0.625 },
+    ['other'] = { 0, 0.3125, 0, 0.3125 },
 };
 
 local LootItemEntryFactory;
-LootMItemEntries = {};
+LootMItemEntries = { };
 
 -- closure of player frame (each player listed under the loot item)
-local playerFrameFactory = function (parent, index, playerName, role, rollId, itemsTable, improvementRating)
-    -- print('playerFrameFactory');
+local playerFrameFactory = function(parent, index, playerName, role, rollId, itemsTable, improvementRating)
+    debug('playerFrameFactory');
     local indexOffset = 22;
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
     local isShown = true;
     local equippedItemLevel = 1000;
     local onClickCallback;
 
-    frame:SetScript("OnClick", function ()
+    frame:SetScript("OnClick", function()
         onClickCallback(playerName);
-    end);
+    end );
 
     local function setAnchor()
-        if (index > maxPlayerRollShown) then 
-            frame:Hide(); 
+        if (index > maxPlayerRollShown) then
+            frame:Hide();
         elseif (isShown) then
             frame:ClearAllPoints();
             frame:SetPoint("TOPLEFT", parent.ItemDetails, "BOTTOMLEFT", 10, -((index - 1) * indexOffset));
-            frame:Show(); 
+            frame:Show();
         end
     end;
 
@@ -57,12 +57,12 @@ local playerFrameFactory = function (parent, index, playerName, role, rollId, it
     local function updateFrame()
         frame.PlayerName:SetText(playerName);
         frame.RollTexture:SetTexture(rollTextures[rollId]);
-        frame.ImprovementRating:SetText('['..improvementRating..']');
+        frame.ImprovementRating:SetText('[' .. improvementRating .. ']');
         frame.RoleTexture:SetTexCoord(unpack((roleCoords[role] or roleCoords['other'])));
         equippedItemLevel = 1000;
         setItemFrame(itemsTable[1], frame.EquippedItem1);
         setItemFrame(itemsTable[2], frame.EquippedItem2);
-        
+
         if (index < maxPlayerRollShown) then frame:Show(); end
         isShown = true;
     end;
@@ -71,39 +71,39 @@ local playerFrameFactory = function (parent, index, playerName, role, rollId, it
     setAnchor();
     updateFrame();
     return {
-        IsShown = function () return isShown; end,    
-        GetRoll = function () 
+        IsShown = function() return isShown; end,
+        GetRoll = function()
             if (not isShown) then return nil; end;
-            return rollId; 
+            return rollId;
         end,
-        GetSortOrder = function ()
+        GetSortOrder = function()
             if (not isShown) then return nil; end
             local r = tonumber(rollId);
             if (r == 0) then return nil; end
-            return (r * 1000) + equippedItemLevel;
+            return(r * 1000) + equippedItemLevel;
         end,
-        GetItemLevel = function () return equippedItemLevel; end,
-        PlayerName = function () 
+        GetItemLevel = function() return equippedItemLevel; end,
+        PlayerName = function()
             if (not isShown) then return nil; end;
-            return playerName; 
+            return playerName;
         end,
-        SetIndex = function (i)
-        -- print('SetIndex');
+        SetIndex = function(i)
+            debug('SetIndex');
             index = i;
             setAnchor();
         end,
         -- role, rollId, item table, improvement rating
-        SetRoll = function (s, r, i, imp) 
-            -- print('SetRoll');
+        SetRoll = function(s, r, i, imp)
+            debug('SetRoll');
             role = s;
-            rollId = r; 
+            rollId = r;
             itemsTable = i;
             improvementRating = imp;
             updateFrame();
         end,
         -- player name, role, rollId, item table, improvement rating
-        Update = function (player, s, r, i, imp) 
-            -- print('Update');
+        Update = function(player, s, r, i, imp)
+            debug('Update');
             rollId = r;
             playerName = player;
             role = s;
@@ -111,27 +111,27 @@ local playerFrameFactory = function (parent, index, playerName, role, rollId, it
             improvementRating = imp;
             updateFrame();
         end,
-        Hide = function () isShown = false; frame:Hide(); end,
-        GetFrame = function () return frame; end,
+        Hide = function() isShown = false; frame:Hide(); end,
+        GetFrame = function() return frame; end,
         OnClick = function(callback)
             onClickCallback = callback;
         end,
-        SetAwarded = function ()
+        SetAwarded = function()
             frame.RollTexture:SetTexture(rollTextures['awarded']);
         end,
     };
 end;
 
 -- closure for each item being looted
-LootItemEntryFactory = function (e, previousEntry, playerDetails)
-    -- print('LootItemEntryFactory');
+LootItemEntryFactory = function(e, previousEntry, playerDetails)
+    debug('LootItemEntryFactory');
     local defaultFrameHeight = 52;
     local PlayerDetails = playerDetails;
     local isShown = true;
     local rollChances = maxRollChances;
     local itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
-        GetItemInfo(e);
-    local playerFrames = {};
+    GetItemInfo(e);
+    local playerFrames = { };
     local entryContainer = LootMFrames['LootMLootFrame'].ScrollFrame.ItemEntryContainer;
     local frame = CreateFrame('Button', nil, entryContainer, 'ItemEntryDetailsTemplate');
     local rollButtons = { frame.ItemDetails.needButton, frame.ItemDetails.greedButton, frame.ItemDetails.passButton };
@@ -140,42 +140,42 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     else
         frame:SetPoint("TOPLEFT", entryContainer, "TOPLEFT", 10, 0);
     end
-    
-    local function ForEachRollButton(f) 
-        for k,button in pairs(rollButtons) do f(button) end;
+
+    local function ForEachRollButton(f)
+        for k, button in pairs(rollButtons) do f(button) end;
     end
-    local turnOffRollButtons = function () 
-        ForEachRollButton(function (b) 
+    local turnOffRollButtons = function()
+        ForEachRollButton( function(b)
             b:GetNormalTexture():SetDesaturated(true);
             b:GetHighlightTexture():SetDesaturated(true);
             b:GetPushedTexture():SetDesaturated(true);
             b:Disable();
-        end);
+        end );
     end
 
-    local turnOnRollButtons = function ()
-        ForEachRollButton(function (b) 
+    local turnOnRollButtons = function()
+        ForEachRollButton( function(b)
             b:Enable();
             b:GetNormalTexture():SetDesaturated(false);
             b:GetHighlightTexture():SetDesaturated(false);
             b:GetPushedTexture():SetDesaturated(false);
-        end);
+        end );
     end
 
     local rollButtonClickHandler = function(self)
         LootMComms.Roll(self:GetID(), itemLink, PlayerDetails);
-        rollChances = rollChances -1;
+        rollChances = rollChances - 1;
         if (rollChances <= 0) then
             turnOffRollButtons();
         end;
     end;
 
-    local updateRollCount = function ()
-        local rollCount = {};
-        for k,v in pairs(playerFrames) do
+    local updateRollCount = function()
+        local rollCount = { };
+        for k, v in pairs(playerFrames) do
             local roll = v.GetRoll();
             if (roll) then
-                rollCount[roll] = (rollCount[roll] or 0) +1;
+                rollCount[roll] =(rollCount[roll] or 0) + 1;
             end
         end
         frame.ItemDetails.needButton.Label:SetText(rollCount['1']);
@@ -188,7 +188,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     frame.ItemDetails.passButton:SetScript('OnClick', rollButtonClickHandler);
 
     local function populateFrame()
-    -- print('populateFrame');
+        debug('populateFrame');
         frame.ItemDetails.ItemName:SetText(itemLink);
         frame.ItemDetails.ItemTexture:SetTexture(itemTexture);
         frame.ItemDetails.ItemLink = itemLink;
@@ -227,11 +227,11 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     populateFrame();
 
     local function updateHeight()
-        -- print('LootItemEntryFactory:updateHeight');
+        debug('LootItemEntryFactory:updateHeight');
         local playerCount = 0;
-        for k,v in pairs(playerFrames) do 
-            if (v.IsShown()) then 
-                playerCount = playerCount +1;
+        for k, v in pairs(playerFrames) do
+            if (v.IsShown()) then
+                playerCount = playerCount + 1;
             end
         end;
         playerCount = math.min(playerCount, maxPlayerRollShown);
@@ -239,17 +239,20 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     end;
 
     local function sortPlayerTable()
-        -- print('sortPlayerTable');
-        local index =1;
-        for k,v in spairs(playerFrames, function (t, a, b)
+        debug('sortPlayerTable');
+        local index = 1;
+        for
+            k, v in spairs(playerFrames, function(t, a, b)
                 local sortOrdera = t[a].GetSortOrder();
                 local sortOrderb = t[b].GetSortOrder();
                 if (not sortOrdera) then return false; end
-                if (not sortOrderb) then return true; end -- a has a value, b does not
+                if (not sortOrderb) then return true; end
+                -- a has a value, b does not
                 return sortOrdera < sortOrderb;
-            end) do
+            end )
+        do
             v.SetIndex(index);
-            index = index +1;
+            index = index + 1;
         end
     end;
 
@@ -258,12 +261,12 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     end
 
     return {
-        GetItemLink = function () return itemLink; end,
-        IsShown = function () return isShown; end,
-        Show = function (e, playerDetails) 
-        -- print('LootItemEntryFactory:Show');
+        GetItemLink = function() return itemLink; end,
+        IsShown = function() return isShown; end,
+        Show = function(e, playerDetails)
+            debug('LootItemEntryFactory:Show');
             itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
-                GetItemInfo(e);
+            GetItemInfo(e);
             PlayerDetails = playerDetails;
             rollChances = maxRollChances;
             turnOnRollButtons();
@@ -271,17 +274,17 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
             updateHeight();
             isShown = true;
         end,
-        Hide = function () 
-        -- print('LootItemEntryFactory:Hide');
+        Hide = function()
+            debug('LootItemEntryFactory:Hide');
             frame:Hide();
-            for k,v in pairs(playerFrames) do v.Hide(); end;
-            isShown = false; 
+            for k, v in pairs(playerFrames) do v.Hide(); end;
+            isShown = false;
         end,
-        GetFrame = function () return frame; end,
-        SetPlayerRoll = function (player, role, rollId, itemsTable, improvementRating)
-            -- print('LootItemEntryFactory:SetPlayerRoll');
+        GetFrame = function() return frame; end,
+        SetPlayerRoll = function(player, role, rollId, itemsTable, improvementRating)
+            debug('LootItemEntryFactory:SetPlayerRoll');
             local index = 1;
-            for k,v in pairs(playerFrames) do
+            for k, v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
                     v.SetRoll(role, rollId, itemsTable, improvementRating);
                     sortPlayerTable();
@@ -295,7 +298,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
                     updateRollCount();
                     return;
                 end
-                index = index +1;
+                index = index + 1;
             end
             local newPlayerFrame = playerFrameFactory(frame, index, player, role, rollId, itemsTable, improvementRating);
             table.insert(playerFrames, newPlayerFrame);
@@ -304,10 +307,10 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
             updateHeight();
             updateRollCount();
         end,
-        AwardItem = function (player)
-        -- print('LootItemEntryFactory:AwardItem');
+        AwardItem = function(player)
+            debug('LootItemEntryFactory:AwardItem');
             turnOffRollButtons();
-            for k,v in pairs(playerFrames) do
+            for k, v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
                     v.SetAwarded();
                     return;
@@ -319,24 +322,24 @@ end
 
 function LootMEvents.LootMLootFrame_OnLoad()
     -- the main collection of loot items
-    LootMItemEntries = (function () 
-    -- print('LootItemEntryFactory:LootMItemEntries');
-        local itemEntries = {};
+    LootMItemEntries =( function()
+        debug('LootItemEntryFactory:LootMItemEntries');
+        local itemEntries = { };
         local frame = LootMFrames['LootMLootFrame'];
         return {
-            Hide = function () 
-                for k,v in pairs(itemEntries) do
+            Hide = function()
+                for k, v in pairs(itemEntries) do
                     v.Hide();
                 end
                 frame:Hide();
             end,
-            Show = function ()
+            Show = function()
                 frame:Show();
             end,
-            ShowItem = function (itemLink, playerDetails)
-            -- print('LootMItemEntries:ShowItem');
+            ShowItem = function(itemLink, playerDetails)
+                debug('LootMItemEntries:ShowItem');
                 local lastEntry;
-                for k,v in pairs(itemEntries) do
+                for k, v in pairs(itemEntries) do
                     if (not v.IsShown()) then
                         v.Show(itemLink, playerDetails);
                         return;
@@ -345,27 +348,37 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 end
                 table.insert(itemEntries, LootItemEntryFactory(itemLink, lastEntry, playerDetails));
             end,
-            GetItems = function ()
-            -- print('LootMItemEntries:GetItems');
-                local output = {};
-                for k,v in pairs(itemEntries) do
+            GetItems = function()
+                debug('LootMItemEntries:GetItems');
+                local output = { };
+                for k, v in pairs(itemEntries) do
                     table.insert(output, v.GetItemLink());
                 end
                 return output;
             end,
-            SetPlayerRoll = function (itemLink, player, role, rollId, itemsTable, improvementRating)
-            -- print('LootMItemEntries:SetPlayerRoll');
-                for k,v in pairs(itemEntries) do
+            SetPlayerRoll = function(itemLink, player, role, rollId, itemsTable, improvementRating)
+                debug('LootMItemEntries:SetPlayerRoll');
+                debug(itemLink .. ';' .. player .. ';' .. role .. ';' .. rollId .. ';');
+                for k, v in pairs(itemsTable) do
+                    debug(k .. ": " .. v);
+                end
+                for k, v in pairs(itemEntries) do
+                    debug(' my link: '..string.gsub(v.GetItemLink(), "\124", "\124\124"));
+                    debug(' re link: '..string.gsub(itemLink, "\124", "\124\124"));
                     if (v.GetItemLink() == itemLink) then
-                        v.SetPlayerRoll(player, role, rollId,  itemsTable, improvementRating);
+                        debug('found that item!');
+                        v.SetPlayerRoll(player, role, rollId, itemsTable, improvementRating);
+                        return;
                     end
                 end
+                debug('could not find item to set roll.');
             end,
-            IsNewLoot = function (lootTable)
-            -- print('LootMItemEntries:IsNewLoot');
-                for k,v in pairs(lootTable) do
+            IsNewLoot = function(lootTable)
+                debug('LootMItemEntries:IsNewLoot');
+                if (not lootTable) then return false; end
+                for k, v in pairs(lootTable) do
                     local newLoot = true;
-                    for l,i in pairs(itemEntries) do
+                    for l, i in pairs(itemEntries) do
                         if (v == i.GetItemLink()) then
                             newLoot = false;
                             break;
@@ -376,13 +389,13 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 return false;
             end,
             -- doesn't award the item, but updates the UI to show an item has been awarded
-            AwardItem = function (itemLink, player)
-                for k,v in pairs(itemEntries) do
+            AwardItem = function(itemLink, player)
+                for k, v in pairs(itemEntries) do
                     if (v.GetItemLink() == itemLink) then
                         v.AwardItem(player);
                     end
                 end
             end
         };
-    end)();
+    end )();
 end

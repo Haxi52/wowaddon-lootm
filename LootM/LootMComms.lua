@@ -12,7 +12,7 @@ LootMComms =( function()
     local pendingMessages = { };
 
     local function processNewLootMessage(itemCount)
-        -- print('processNewLootMessage');
+        debug('processNewLootMessage');
         -- deturmins if the new loot spool has all the items expected then calls out for the items to be loaded
         if (not newLootMessageSpool) then
             newLootMessageSpool = {};
@@ -32,7 +32,7 @@ LootMComms =( function()
             LootMItemEntries.ShowItem(itemLink, playerDetails);    
         end    
         LootMItemEntries.Show();
-        -- print('[LootM] Staring new loot session. Take a gander');
+        print('[LootM] Staring new loot session. Take a gander');
     end
 
     
@@ -40,7 +40,7 @@ LootMComms =( function()
     -- see below for the format of each message type
     local chatMessageHandlers = {
         [newLootPrefix] = function(message, sender)
-            -- print('newLootPrefix');
+            debug('LootComms: new loot recieved');
             local parsedMessage = {};
             for i in string.gmatch(message, "([^;]+)") do
                 table.insert(parsedMessage, i);
@@ -54,6 +54,8 @@ LootMComms =( function()
 
             -- if the item is not loaded, pend the message until the server can get us info about the item
             if (not GetItemInfo(itemLink)) then
+                debug('item not loaded, queing');
+                LootM.QueuePendingItem(itemLink);
                 table.insert(pendingMessages,
                 {
                     MessageType = newLootPrefix,
@@ -67,6 +69,8 @@ LootMComms =( function()
             processNewLootMessage(messageCount);
         end,
         [rollPrefix] = function(message, sender)
+            debug('LootComms: roll recieved');
+            debug(message);
             local parsedMessage = {};
             for i in string.gmatch(message, "([^;]+)") do
                 table.insert(parsedMessage, i);
@@ -77,14 +81,20 @@ LootMComms =( function()
 
             -- We are not short-circuting this logic because we want to make sure all
             -- items are being requested from the server.
-            local requiresItemLoad = (not GetItemInfo(itemLink));
+            local requiresItemLoad = false;
+            if (not GetItemInfo(itemLink)) then
+                requiresItemLoad = true;
+                LootM.QueuePendingItem(itemLink);
+            end
             for k,item in pairs(playerItems) do
                 if (not GetItemInfo(item)) then
+                    LootM.QueuePendingItem(item);
                     requiresItemLoad = true;
                 end
             end
 
             if (requiresItemLoad) then
+                debug('LootComms: roll recieved -> Requires item load');
                 table.insert(pendingMessages,
                 {
                     MessageType = rollPrefix,
@@ -114,7 +124,7 @@ LootMComms =( function()
     end;
 
     local itemsLoaded = function()
-        -- print('items loaded');
+        debug('items loaded');
         if (#pendingMessages < 1) then return; end
         -- swap out the table so we can process the messages
         local messages, pendingMessages = pendingMessages, {};
@@ -134,6 +144,7 @@ LootMComms =( function()
     return {
         -- signals to raid members new lootable items are available from the loot master
         NewLoot = function(lootTable)
+            debug('LootCooms: newloot');
             local lootCount = #lootTable;
             for i, v in ipairs(lootTable) do
                 -- [total messages];[this message index];[item link]
@@ -146,6 +157,7 @@ LootMComms =( function()
 
         -- singles a player's roll selection on a item being looted
         Roll = function(rollId, itemLink, playerDetails)
+            debug('LootCooms: Roll');
             local role = GetSpecializationRole(GetActiveSpecGroup());
             local message = { rollId, role, itemLink, playerDetails.ImprovementRaiting };
             for k,v in pairs(playerDetails.PlayerItems) do

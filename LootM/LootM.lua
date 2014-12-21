@@ -1,11 +1,17 @@
-print('[LootM] 0.0.11');
+print('[LootM] 0.0.12');
+
 seterrorhandler(print);
+function debug(message)
+    print(message);
+end
 
 ConfirmLootAwardDialg = 'LootM_ConfirmAwardLoot';
 
 LootMFrames = { };
 LootMEvents = { };
 LootMItemEvaluator = { };
+local pendingItems = {};
+
 
 LootM = CreateFrame("FRAME", "LootM"), { };
 
@@ -58,6 +64,12 @@ function LootMEvents:RAID_INSTANCE_WELCOME(...)
     LootM.Update();
 end
 function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
+    if (#pendingItems > 0) then
+        for k,v in pairs(pendingItems) do
+            if (not GetItemInfo(v)) then return; end
+        end
+    end
+    pendingItems = {};
     LootMComms.ItemsLoaded(...);
 end
 function LootMEvents:CHAT_MSG_ADDON(...)
@@ -96,10 +108,20 @@ LootM.IsLootMaster = function()
 --    return false;
 end
 
+LootM.QueuePendingItem = function (itemlink)
+    pendingItems = pendingItems or {};
+    table.insert(pendingItems, itemlink);
+end
+
 LootM.GetLootItems = function () 
     local lootTable = { };
     for i = 1, GetNumLootItems() do
         local itemLink = GetLootSlotLink(i);
+        if (not itemLink) then
+            -- TODO: proper que this
+            debug('item not loaded yet');
+            return nil;
+        end
         _, _, itemRarity = GetItemInfo(itemLink);
         if (itemRarity >= GetLootThreshold()) then
             table.insert(lootTable, itemLink);
@@ -125,17 +147,17 @@ LootM.AwardLoot = function(playerName, itemLink)
             end
         end
         if (lootIndex == 0) then
-            -- print('[LootM] Unable to find loot item!');
+            print('[LootM] Unable to find loot item!');
         end
 
         for i = 1, 40 do
             local candidate = GetMasterLootCandidate(lootIndex, i);
             if (candidate == nil) then 
-                -- print('[LootM] Unable to find player to award loot!');
+                print('[LootM] Unable to find player to award loot!');
                 break; 
             end
             if (candidate == playerName) then
-                -- print('[LootM] Awarding '..itemLink..' to '..playerName);
+                print('[LootM] Awarding '..itemLink..' to '..playerName);
                 GiveMasterLoot(lootIndex, i);  
                 LootMComms.Award(itemLink, playerName);   
             end
