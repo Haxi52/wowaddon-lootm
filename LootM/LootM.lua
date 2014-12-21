@@ -177,11 +177,11 @@ LootMItemEvaluator =( function()
     };
 
     local tokenIcons = {
-        ["interface\icons\inv_chest_chain_10"] = 5,
-        ["interface\icons\inv_gauntlets_29"] = 10,
-        ["interface\icons\inv_helmet_24"] = 1,
-        ["interface\icons\inv_misc_desecrated_platepants"] = 7,
-        ["interface\icons\inv_shoulder_22"] = 3,
+        ["interface\\icons\\inv_chest_chain_10.blp"] = 5,
+        ["interface\\icons\\inv_gauntlets_29.blp"] = 10,
+        ["interface\\icons\\inv_helmet_24.blp"] = 1,
+        ["interface\\icons\\inv_misc_desecrated_platepants.blp"] = 7,
+        ["interface\\icons\\inv_shoulder_22.blp"] = 3,
     };
 
     local offHandItemType, twoHandItemType, oneHandItemType = "offhand", "twohand", "onehand";
@@ -350,6 +350,16 @@ LootMItemEvaluator =( function()
         end,
         GetItemValue = function(itemLink, weightTable)
             return getItemValue(itemLink, weightTable);
+        end,
+        GetTokenType = function(itemLink)
+            local _, _, _, _, _, itemType, itemSubType, _, itemEquipLocation, itemTexture = GetItemInfo(itemLink);
+            local slotIndex = getItemTokenSlot(itemType, itemSubType, itemTexture);
+            if (not slotIndex) then return; end
+            for k,v in pairs(inventoryMap) do
+                if (v == slotIndex) then
+                    return _G[k];
+                end
+            end
         end,
     };
 

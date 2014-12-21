@@ -2,9 +2,9 @@
 
 LootMComms =( function()
 
-    -- local raidMessageType = "OFFICER";
+    local raidMessageType = "OFFICER";
     -- changed for testing
-    local raidMessageType = "RAID";
+    -- local raidMessageType = "RAID";
     local newLootPrefix = 'LootMNew';
     local rollPrefix = 'LootMRoll';
     local awardPrefix = 'LootMAward';

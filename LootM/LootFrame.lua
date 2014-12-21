@@ -176,8 +176,12 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         frame.ItemDetails.ItemLink = itemLink;
         frame.ItemDetails.ItemLevel:SetText(itemLevel);
         frame.ItemDetails.ImprovementRating:SetText(PlayerDetails.ImprovementRaiting);
+
         local thisItemType, thisItemSubType;
-        if (itemSubType == 'Miscellaneous') then
+        local tokenType = LootMItemEvaluator.GetTokenType(itemLink);
+        if (tokenType) then
+            thisItemType = tokenType;
+        elseif (itemSubType == 'Miscellaneous') then
             thisItemType = _G[itemEquipLocation];
         elseif (itemType == 'Weapon') then
             thisItemType = itemSubType;
@@ -185,6 +189,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
             thisItemType = itemSubType;
             thisItemSubType = _G[itemEquipLocation];
         end
+
         if (thisItemType) then
             frame.ItemDetails.ItemType:SetText(thisItemType);
         else
@@ -195,6 +200,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         else
             frame.ItemDetails.ItemSubType:SetText('');
         end
+
         updateRollCount();
         -- TODO: disable need button when not usable;
         frame:Show();

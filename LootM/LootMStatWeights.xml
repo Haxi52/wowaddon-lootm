@@ -1,0 +1,97 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML.old\UI.xsd">
+  <Script file="LootMStatWeights.lua" />
+  <Frame name="StatEditor" virtual="true">
+    <Size x="300" y="30" />
+    <Layers>
+      <Layer>
+        <FontString parentKey="Label" inherits="GameFontHighlightSmall" text="Name of stat" justifyH="RIGHT">
+          <Size x="100" y="20" />
+          <Anchors>
+            <Anchor point="LEFT" />
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+    <Frames>
+      <EditBox parentKey="Value" autoFocus="false" inherits="InputBoxTemplate">
+        <Size x="100" y="28" />
+        <Anchors>
+          <Anchor point="LEFT">
+            <Offset x="120" />
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnEditFocusLost>
+            self.SaveWeights();
+          </OnEditFocusLost>
+        </Scripts>
+      </EditBox>
+    </Frames>
+  </Frame>
+  <Frame name="LootMStatWeightEditor" parent="UIParent" hidden="true" toplevel="true" movable="true">
+    <Size>
+      <AbsDimension x="350" y="450" />
+    </Size>
+    <Anchors>
+      <Anchor point="CENTER" />
+    </Anchors>
+    <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
+          edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+      <BackgroundInsets>
+        <AbsInset left="11" right="12" top="12" bottom="11"/>
+      </BackgroundInsets>
+      <TileSize>
+        <AbsValue val="32"/>
+      </TileSize>
+      <EdgeSize>
+        <AbsValue val="32"/>
+      </EdgeSize>
+    </Backdrop>
+    <Frames>
+      <Frame name="header" enableMouse="true" frameLevel="4">
+        <Anchors>
+          <Anchor point="TOP">
+            <Offset y="18" />
+          </Anchor>
+        </Anchors>
+        <Size x="350" y="55" />
+        <Layers>
+          <Layer level="BACKGROUND">
+            <Texture file="Interface\DialogFrame\UI-DialogBox-Header" />
+            <FontString inherits="GameFontNormal" text="LootM - Stat Weights" justifyH="CENTER" justifyV="MIDDLE">
+              <Anchors>
+                <Anchor point="CENTER">
+                  <Offset y="10"/>
+                </Anchor>
+              </Anchors>
+              <Size x="200" y="20"/>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnLoad>
+            self:RegisterForDrag("LeftButton");
+          </OnLoad>
+          <OnDragStart>self:GetParent():StartMoving();</OnDragStart>
+          <OnDragStop>self:GetParent():StopMovingOrSizing();</OnDragStop>
+        </Scripts>
+      </Frame>
+      <Button inherits="UIPanelCloseButton" frameLevel="5">
+        <Anchors>
+          <Anchor point="TOPRIGHT">
+          </Anchor>
+        </Anchors>
+      </Button>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        RegisterFrame(self);
+        self:RegisterForDrag("LeftButton");
+      </OnLoad>
+      <OnDragStart>self:StartMoving();</OnDragStart>
+      <OnDragStop>self:StopMovingOrSizing();</OnDragStop>
+    </Scripts>
+  </Frame>
+</Ui>
