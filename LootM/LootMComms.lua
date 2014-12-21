@@ -130,7 +130,7 @@ LootMComms =( function()
 
         -- check each pending message and see that the items are loaded
         for k,v in pairs(pendingMessages) do           
-            for i,j in pairs(pendingMessages[index].LoadItems) do
+            for i,j in pairs(pendingMessages[k].LoadItems) do
                 if (not GetItemInfo(j)) then 
                     return;
                 end

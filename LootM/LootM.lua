@@ -12,6 +12,7 @@ LootMEvents = { };
 LootMItemEvaluator = { };
 local pendingItems = {};
 local resumeLoadedItems;
+local CheckItemsLoaded;
 
 LootM = CreateFrame("FRAME", "LootM"), { };
 
@@ -132,7 +133,7 @@ LootM.GetLootItems = function ()
     return lootTable;
 end
 
-local function CheckItemsLoaded()
+CheckItemsLoaded = function ()
     if (#pendingItems > 0) then
         for k,v in pairs(pendingItems) do
             if (not GetItemInfo(v)) then return; end
@@ -158,6 +159,7 @@ LootM.ResetLoot = function ()
 end
 
 LootM.AwardLoot = function(playerName, itemLink)
+    local playerWithOutServer = string.gmatch(playerName, "([^-]+)")(); -- strip the servername off player name
     if (not LootM.IsLootMaster()) then return; end
     local awardLoot = function () 
         debug('award loot '..itemLink..' to player '..playerName);
@@ -178,10 +180,11 @@ LootM.AwardLoot = function(playerName, itemLink)
                 print('[LootM] Unable to find player to award loot!');
                 break; 
             end
-            if (candidate == playerName) then
+            if (candidate == playerWithOutServer) then
                 print('[LootM] Awarding '..itemLink..' to '..playerName);
                 GiveMasterLoot(lootIndex, i);  
                 LootMComms.Award(itemLink, playerName);   
+                return;
             end
         end
     end;
