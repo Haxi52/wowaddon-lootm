@@ -1,8 +1,8 @@
-print('[LootM] 0.0.12');
+print('[LootM] 0.0.15');
 
 seterrorhandler(print);
 function debug(message)
-    print(message);
+    --print(message);
 end
 
 ConfirmLootAwardDialg = 'LootM_ConfirmAwardLoot';
@@ -10,15 +10,11 @@ ConfirmLootAwardDialg = 'LootM_ConfirmAwardLoot';
 LootMFrames = { };
 LootMEvents = { };
 LootMItemEvaluator = { };
-local pendingItems = {};
-local resumeLoadedItems;
-local CheckItemsLoaded;
-
 LootM = CreateFrame("FRAME", "LootM"), { };
 
 LootMFrames["LootM"] = LootM;
 
-LootM.Update = function ()
+LootM.Update = function()
     local resetButton = LootMFrames["LootMLootFrame"].ResetButton;
     if (LootM.IsLootMaster()) then
         resetButton:Show();
@@ -27,35 +23,30 @@ LootM.Update = function ()
     end
 end
 
-LootM.Init = function ()
+LootM.Init = function()
     StaticPopupDialogs[ConfirmLootAwardDialg] = {
-      text = "Are you sure you wish to award %s to %s",
-      button1 = ACCEPT,
-      button2 = CANCEL,
-      OnAccept = function(self, data)
-          if (type(data) == 'function') then data(); end
-      end,
-      timeout = 0,
-      whileDead = true,
-      hideOnEscape = true,
-      preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+        text = "Are you sure you wish to award %s to %s",
+        button1 = ACCEPT,
+        button2 = CANCEL,
+        OnAccept = function(self, data)
+            if (type(data) == 'function') then data(); end
+        end,
+        timeout = 0,
+        whileDead = true,
+        hideOnEscape = true,
+        preferredIndex = 3,-- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
     };
 
     LootM.Update();
 end
 
-function LootMEvents:LOOT_OPENED(...)
-    local callNewLoot = function(t)
-        if (LootMItemEntries.IsNewLoot(t)) then
-            LootMComms.NewLoot(t);
-        end 
-    end
+function LootMEvents:LOOT_READY(...)
+    debug("trying to loot...");
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = LootM.GetLootItems();
-    if (lootTable) then 
-        callNewLoot(lootTable);
-    else
-        resumeLoadedItems = callNewLoot;
+    if (not lootTable) then return; end
+    if (LootMItemEntries.IsNewLoot(lootTable)) then
+        LootMComms.NewLoot(lootTable);
     end
 end
 
@@ -72,8 +63,12 @@ function LootMEvents:RAID_INSTANCE_WELCOME(...)
     LootM.Update();
 end
 function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
-    CheckItemsLoaded();
-    LootMComms.ItemsLoaded(...);
+    if(lootIsntReadyFlag) then
+        lootIsntReadyFlag = false;
+        LootMEvents.LOOT_READY(...);
+    else
+        LootMComms.ItemsLoaded(...);
+    end
 end
 function LootMEvents:CHAT_MSG_ADDON(...)
     LootMComms.MessageRecieved(...);
@@ -107,62 +102,34 @@ LootM.IsLootMaster = function()
     return false;
 end
 
-LootM.QueuePendingItem = function (itemlink)
-    pendingItems = pendingItems or {};
-    table.insert(pendingItems, itemlink);
-end
 
-LootM.GetLootItems = function () 
+LootM.GetLootItems = function()
     local lootTable = { };
-    local requiresItemLoad = false;
     for i = 1, GetNumLootItems() do
         local itemLink = GetLootSlotLink(i);
-        if (not itemLink) then
-            debug('item not loaded yet');
-            requiresItemLoad = true;
-            LootM.QueuePendingItem(itemLink);
-            return nil;
-        else
+        if (itemLink) then
             _, _, itemRarity = GetItemInfo(itemLink);
             if (itemRarity >= GetLootThreshold()) then
                 table.insert(lootTable, itemLink);
             end
         end
     end
-    if (requiresItemLoad) then return nil; end;
     return lootTable;
 end
 
-CheckItemsLoaded = function ()
-    if (#pendingItems > 0) then
-        for k,v in pairs(pendingItems) do
-            if (not GetItemInfo(v)) then return; end
-        end
-    end
-    pendingItems = {};
-    if (resumeLoadedItems and type(resumeLoadedItems) == 'function') then
-        local f=resumeLoadedItems;
-        resumeLoadedItems= nil;
-        local lootTable = LootM.GetLootItems();
-        if (lootTable) then f(lootTable); end
-    end
-end
-
-LootM.ResetLoot = function ()
+LootM.ResetLoot = function()
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = LootM.GetLootItems();
-    if (lootTable) then 
-        LootMComms.NewLoot(lootTable);
-    else
-        resumeLoadedItems = LootMComms.NewLoot;
-    end
+    if (not lootTable) then return; end
+    LootMComms.NewLoot(lootTable);
 end
 
 LootM.AwardLoot = function(playerName, itemLink)
-    local playerWithOutServer = string.gmatch(playerName, "([^-]+)")(); -- strip the servername off player name
+    local playerWithOutServer = string.gmatch(playerName, "([^-]+)")();
+    -- strip the servername off player name
     if (not LootM.IsLootMaster()) then return; end
-    local awardLoot = function () 
-        debug('award loot '..itemLink..' to player '..playerName);
+    local awardLoot = function()
+        debug('award loot ' .. itemLink .. ' to player ' .. playerName);
         local lootIndex = 0;
         for i = 1, GetNumLootItems() do
             if (itemLink == GetLootSlotLink(i)) then
@@ -176,14 +143,14 @@ LootM.AwardLoot = function(playerName, itemLink)
 
         for i = 1, 40 do
             local candidate = GetMasterLootCandidate(lootIndex, i);
-            if (candidate == nil) then 
+            if (candidate == nil) then
                 print('[LootM] Unable to find player to award loot!');
-                break; 
+                break;
             end
             if (candidate == playerWithOutServer) then
-                print('[LootM] Awarding '..itemLink..' to '..playerName);
-                GiveMasterLoot(lootIndex, i);  
-                LootMComms.Award(itemLink, playerName);   
+                print('[LootM] Awarding ' .. itemLink .. ' to ' .. playerName);
+                GiveMasterLoot(lootIndex, i);
+                LootMComms.Award(itemLink, playerName);
                 return;
             end
         end
@@ -266,41 +233,50 @@ LootMItemEvaluator =( function()
 
     local function getPlayerWeaponRelatedItems(itemLink, itemEquipLocation)
         -- this is rather complicated. The gloal here is readability, so have some repetitive code
-        local playerItems={};
+        local playerItems = { };
         local lootItemType, playerItemType;
         local mainHandSlot, offHandSlot = 16, 17;
 
-        if (offHandItems[itemEquipLocation]) then -- is the looted item an offhand?
+        if (offHandItems[itemEquipLocation]) then
+            -- is the looted item an offhand?
             lootItemType = offHandItemType;
             local offHandItem = getPlayerInventoryItem(offHandSlot);
 
-            if (not offHandItem) then -- loot item is an offhand, but equipped 2 hander
+            if (not offHandItem) then
+                -- loot item is an offhand, but equipped 2 hander
                 playerItemType = twoHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
-            else -- loot item is offhand and has equipped offhand/one hander
+            else
+                -- loot item is offhand and has equipped offhand/one hander
                 playerItemType = offHandItemType;
                 playerItems[1] = offHandItem;
             end
-        elseif (oneHandItems[itemEquipLocation]) then -- is the looted item a one hander?
+        elseif (oneHandItems[itemEquipLocation]) then
+            -- is the looted item a one hander?
             lootItemType = oneHandItemType;
             local offHandItem = getPlayerInventoryItem(offHandSlot);
 
-            if (not offHandItem) then -- looted item is 1h but have equipped a 2h
+            if (not offHandItem) then
+                -- looted item is 1h but have equipped a 2h
                 playerItemType = twoHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
-            else -- item loot is 1 hand and have equipped 1handers 
+            else
+                -- item loot is 1 hand and have equipped 1handers
                 playerItemType = oneHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
                 playerItems[2] = offHandItem;
             end
-        elseif (twoHandItems[itemEquipLocation]) then -- is the looted item a two hander?
+        elseif (twoHandItems[itemEquipLocation]) then
+            -- is the looted item a two hander?
             lootItemType = twoHandItemType;
             local offHandItem = getPlayerInventoryItem(offHandSlot);
 
-            if (not offHandItem) then -- loot item is 2h and has equipped a 2h
+            if (not offHandItem) then
+                -- loot item is 2h and has equipped a 2h
                 playerItemType = twoHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
-            else -- loot item is 2h and has equpped 1hx2 or mh,oh
+            else
+                -- loot item is 2h and has equpped 1hx2 or mh,oh
                 playerItemType = oneHandItemType;
                 playerItems[1] = getPlayerInventoryItem(mainHandSlot);
                 playerItems[2] = offHandItem;
@@ -364,7 +340,8 @@ LootMItemEvaluator =( function()
         if (equippedValue > 0 and newValue > 0) then
             value =(newValue - equippedValue) / equippedValue;
             value = math.max(0, value);
-            value = math.floor(value * 100); -- 2x the % value
+            value = math.floor(value * 100);
+            -- 2x the % value
         end
         return value;
     end
@@ -375,22 +352,25 @@ LootMItemEvaluator =( function()
         -- if the items are not weapons, or the weapons are the same
         -- the comparison is straight forward
         -- lootItemType is set in function (getPlayerWeaponRelatedItems)
-        if (not lootItemType or (lootItemType == playerItemType)) then
+        if (not lootItemType or(lootItemType == playerItemType)) then
             for k, v in pairs(playerItems) do
                 local old = getItemValue(v, statWeights);
                 improvementRating = math.max(getItemImprovementRating(old, new), improvementRating);
             end
-        elseif (lootItemType == twoHandItemType) then -- not the same, so player type is 1 or offhand
-            local equippedValue = 
-                getItemValue(playerItems[1], statWeights) +
-                getItemValue(playerItems[2], statWeights); -- add the value of both equipped weapons to compare against 2h
+        elseif (lootItemType == twoHandItemType) then
+            -- not the same, so player type is 1 or offhand
+            local equippedValue =
+            getItemValue(playerItems[1], statWeights) +
+            getItemValue(playerItems[2], statWeights);
+            -- add the value of both equipped weapons to compare against 2h
             improvementRating = getItemImprovementRating(equippedValue, new);
         elseif (lootItemType == oneHandItemtype or lootItemType == offHandItemType) then
             -- player should have a 2h
             local equippedValue = getItemValue(playerItems[1], statWeights);
-            improvementRating = getItemImprovementRating(equippedValue, (new * 2));
+            improvementRating = getItemImprovementRating(equippedValue,(new * 2));
         end
-        return math.min(99, math.max(0, improvementRating)); -- capped between 0 and 99
+        return math.min(99, math.max(0, improvementRating));
+        -- capped between 0 and 99
     end
 
     return {
@@ -398,8 +378,8 @@ LootMItemEvaluator =( function()
             -- find out which items we are interested in comparing against the looted item.
             local playerItems, lootItemType, playerItemType = getPlayerRelatedItems(itemLink);
             -- calculate an improvement rating agaist the player equipped items
-            local improvementRating = 
-                calculateImprovementRating(itemLink, playerItems, LootM.GetPlayerStatWeights(), lootItemType, playerItemType);
+            local improvementRating =
+            calculateImprovementRating(itemLink, playerItems, LootM.GetPlayerStatWeights(), lootItemType, playerItemType);
             local improvementRating = 0;
             return { PlayerItems = playerItems, ImprovementRaiting = improvementRating };
         end,
@@ -410,7 +390,7 @@ LootMItemEvaluator =( function()
             local _, _, _, _, _, itemType, itemSubType, _, itemEquipLocation, itemTexture = GetItemInfo(itemLink);
             local slotIndex = getItemTokenSlot(itemType, itemSubType, itemTexture);
             if (not slotIndex) then return; end
-            for k,v in pairs(inventoryMap) do
+            for k, v in pairs(inventoryMap) do
                 if (v == slotIndex) then
                     return _G[k];
                 end
@@ -444,11 +424,11 @@ SlashCmdList["LOOTM"] = function(message)
     if (rollType) then
         local x = LootMItemEntries.GetItems();
         local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
-        LootMItemEntries.SetPlayerRoll(x[1], 
-            name or 'TheNewGuy', 
-            'DAMAGER', rollType, 
-            playerDetails.PlayerItems,
-            playerDetails.ImprovementRaiting);
+        LootMItemEntries.SetPlayerRoll(x[1],
+        name or 'TheNewGuy',
+        'DAMAGER', rollType,
+        playerDetails.PlayerItems,
+        playerDetails.ImprovementRaiting);
     end
 end;
 
