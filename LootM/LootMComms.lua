@@ -2,9 +2,9 @@
 
 LootMComms =( function()
 
-    local raidMessageType = "OFFICER";
+    local raidMessageType = "GUILD";
     -- changed for testing
-    -- local raidMessageType = "RAID";
+    --local raidMessageType = "RAID";
     local newLootPrefix = 'LootMNew';
     local rollPrefix = 'LootMRoll';
     local awardPrefix = 'LootMAward';
@@ -12,6 +12,7 @@ LootMComms =( function()
     local pendingMessages = { };
 
     local function processNewLootMessage(itemCount)
+        -- print('processNewLootMessage');
         -- deturmins if the new loot spool has all the items expected then calls out for the items to be loaded
         if (not newLootMessageSpool) then
             newLootMessageSpool = {};
@@ -31,7 +32,7 @@ LootMComms =( function()
             LootMItemEntries.ShowItem(itemLink, playerDetails);    
         end    
         LootMItemEntries.Show();
-        print('[LootM] Staring new loot session. Take a gandar');
+        -- print('[LootM] Staring new loot session. Take a gander');
     end
 
     
@@ -39,6 +40,7 @@ LootMComms =( function()
     -- see below for the format of each message type
     local chatMessageHandlers = {
         [newLootPrefix] = function(message, sender)
+            -- print('newLootPrefix');
             local parsedMessage = {};
             for i in string.gmatch(message, "([^;]+)") do
                 table.insert(parsedMessage, i);
@@ -112,6 +114,8 @@ LootMComms =( function()
     end;
 
     local itemsLoaded = function()
+        -- print('items loaded');
+        if (#pendingMessages < 1) then return; end
         -- swap out the table so we can process the messages
         local messages, pendingMessages = pendingMessages, {};
         -- re call into each handler, if the item is still not loaded it will reque the message.

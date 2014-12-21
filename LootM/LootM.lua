@@ -1,3 +1,4 @@
+print('[LootM] 0.0.11');
 seterrorhandler(print);
 
 ConfirmLootAwardDialg = 'LootM_ConfirmAwardLoot';
@@ -80,15 +81,19 @@ for k, v in pairs(LootMEvents) do
 end
 
 LootM.IsEnabled = function()
-    return(IsInRaid() and 'master' == GetLootMethod())
+    -- for debugging
+    return true;
+    --return(IsInRaid() and 'master' == GetLootMethod())
 end
 
 LootM.IsLootMaster = function()
-    local masterLooterId = select(3, GetLootMethod());
-    if masterLooterId then
-        return GetRaidRosterInfo(masterLooterId) == GetUnitName("player");
-    end
-    return false;
+    -- for debugging
+    return true;
+--    local masterLooterId = select(3, GetLootMethod());
+--    if masterLooterId then
+--        return GetRaidRosterInfo(masterLooterId) == GetUnitName("player");
+--    end
+--    return false;
 end
 
 LootM.GetLootItems = function () 
@@ -120,17 +125,17 @@ LootM.AwardLoot = function(playerName, itemLink)
             end
         end
         if (lootIndex == 0) then
-            print('[LootM] Unable to find loot item!');
+            -- print('[LootM] Unable to find loot item!');
         end
 
         for i = 1, 40 do
             local candidate = GetMasterLootCandidate(lootIndex, i);
             if (candidate == nil) then 
-                print('[LootM] Unable to find player to award loot!');
+                -- print('[LootM] Unable to find player to award loot!');
                 break; 
             end
             if (candidate == playerName) then
-                print('[LootM] Awarding '..itemLink..' to '..playerName);
+                -- print('[LootM] Awarding '..itemLink..' to '..playerName);
                 GiveMasterLoot(lootIndex, i);  
                 LootMComms.Award(itemLink, playerName);   
             end
@@ -279,6 +284,7 @@ LootMItemEvaluator =( function()
         local playerItems = { };
 
         if (dataType == 'number') then
+            -- TODO: Player not equipped item crashes.
             table.insert(playerItems, getPlayerInventoryItem(playerSlot));
         elseif (dataType == 'table') then
             for k, v in pairs(playerSlot) do
@@ -343,9 +349,9 @@ LootMItemEvaluator =( function()
             -- find out which items we are interested in comparing against the looted item.
             local playerItems, lootItemType, playerItemType = getPlayerRelatedItems(itemLink);
             -- calculate an improvement rating agaist the player equipped items
-            -- TODO: Grab a stat weight table appropreate for the player
             local improvementRating = 
                 calculateImprovementRating(itemLink, playerItems, LootM.GetPlayerStatWeights(), lootItemType, playerItemType);
+            local improvementRating = 0;
             return { PlayerItems = playerItems, ImprovementRaiting = improvementRating };
         end,
         GetItemValue = function(itemLink, weightTable)
@@ -402,7 +408,7 @@ end;
 function spairs(t, order)
     -- collect the keys
     local keys = { }
-    for k in pairs(t) do keys[#keys + 1] = k end
+    for k in pairs(t) do table.insert(keys, k) end
 
     -- if order function given, sort by it by passing the table and keys a, b,
     -- otherwise just sort the keys

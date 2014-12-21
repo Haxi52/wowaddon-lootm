@@ -20,6 +20,7 @@ LootMItemEntries = {};
 
 -- closure of player frame (each player listed under the loot item)
 local playerFrameFactory = function (parent, index, playerName, role, rollId, itemsTable, improvementRating)
+    -- print('playerFrameFactory');
     local indexOffset = 22;
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
     local isShown = true;
@@ -71,18 +72,29 @@ local playerFrameFactory = function (parent, index, playerName, role, rollId, it
     updateFrame();
     return {
         IsShown = function () return isShown; end,    
-        GetRoll = function () return rollId; end,
+        GetRoll = function () 
+            if (not isShown) then return nil; end;
+            return rollId; 
+        end,
+        GetSortOrder = function ()
+            if (not isShown) then return nil; end
+            local r = tonumber(rollId);
+            if (r == 0) then return nil; end
+            return (r * 1000) + equippedItemLevel;
+        end,
         GetItemLevel = function () return equippedItemLevel; end,
         PlayerName = function () 
             if (not isShown) then return nil; end;
             return playerName; 
         end,
         SetIndex = function (i)
+        -- print('SetIndex');
             index = i;
             setAnchor();
         end,
         -- role, rollId, item table, improvement rating
         SetRoll = function (s, r, i, imp) 
+            -- print('SetRoll');
             role = s;
             rollId = r; 
             itemsTable = i;
@@ -91,6 +103,7 @@ local playerFrameFactory = function (parent, index, playerName, role, rollId, it
         end,
         -- player name, role, rollId, item table, improvement rating
         Update = function (player, s, r, i, imp) 
+            -- print('Update');
             rollId = r;
             playerName = player;
             role = s;
@@ -111,6 +124,7 @@ end;
 
 -- closure for each item being looted
 LootItemEntryFactory = function (e, previousEntry, playerDetails)
+    -- print('LootItemEntryFactory');
     local defaultFrameHeight = 52;
     local PlayerDetails = playerDetails;
     local isShown = true;
@@ -159,7 +173,10 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     local updateRollCount = function ()
         local rollCount = {};
         for k,v in pairs(playerFrames) do
-            rollCount[v.GetRoll()] = (rollCount[v.GetRoll()] or 0) +1;
+            local roll = v.GetRoll();
+            if (roll) then
+                rollCount[roll] = (rollCount[roll] or 0) +1;
+            end
         end
         frame.ItemDetails.needButton.Label:SetText(rollCount['1']);
         frame.ItemDetails.greedButton.Label:SetText(rollCount['2']);
@@ -171,6 +188,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     frame.ItemDetails.passButton:SetScript('OnClick', rollButtonClickHandler);
 
     local function populateFrame()
+    -- print('populateFrame');
         frame.ItemDetails.ItemName:SetText(itemLink);
         frame.ItemDetails.ItemTexture:SetTexture(itemTexture);
         frame.ItemDetails.ItemLink = itemLink;
@@ -209,6 +227,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     populateFrame();
 
     local function updateHeight()
+        -- print('LootItemEntryFactory:updateHeight');
         local playerCount = 0;
         for k,v in pairs(playerFrames) do 
             if (v.IsShown()) then 
@@ -220,14 +239,14 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
     end;
 
     local function sortPlayerTable()
+        -- print('sortPlayerTable');
         local index =1;
         for k,v in spairs(playerFrames, function (t, a, b)
-                if (t[a].GetRoll() == '0') then return true; end
-                if (t[a].GetRoll() == t[b].GetRoll()) then
-                    return t[a].GetItemLevel() < t[b].GetItemLevel();
-                else
-                    return t[a].GetRoll() < t[b].GetRoll();
-                end
+                local sortOrdera = t[a].GetSortOrder();
+                local sortOrderb = t[b].GetSortOrder();
+                if (not sortOrdera) then return false; end
+                if (not sortOrderb) then return true; end -- a has a value, b does not
+                return sortOrdera < sortOrderb;
             end) do
             v.SetIndex(index);
             index = index +1;
@@ -242,6 +261,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
         GetItemLink = function () return itemLink; end,
         IsShown = function () return isShown; end,
         Show = function (e, playerDetails) 
+        -- print('LootItemEntryFactory:Show');
             itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
                 GetItemInfo(e);
             PlayerDetails = playerDetails;
@@ -252,13 +272,14 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
             isShown = true;
         end,
         Hide = function () 
+        -- print('LootItemEntryFactory:Hide');
             frame:Hide();
             for k,v in pairs(playerFrames) do v.Hide(); end;
             isShown = false; 
         end,
         GetFrame = function () return frame; end,
         SetPlayerRoll = function (player, role, rollId, itemsTable, improvementRating)
-            
+            -- print('LootItemEntryFactory:SetPlayerRoll');
             local index = 1;
             for k,v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
@@ -284,6 +305,7 @@ LootItemEntryFactory = function (e, previousEntry, playerDetails)
             updateRollCount();
         end,
         AwardItem = function (player)
+        -- print('LootItemEntryFactory:AwardItem');
             turnOffRollButtons();
             for k,v in pairs(playerFrames) do
                 if (v.PlayerName() == player) then
@@ -298,6 +320,7 @@ end
 function LootMEvents.LootMLootFrame_OnLoad()
     -- the main collection of loot items
     LootMItemEntries = (function () 
+    -- print('LootItemEntryFactory:LootMItemEntries');
         local itemEntries = {};
         local frame = LootMFrames['LootMLootFrame'];
         return {
@@ -311,6 +334,7 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 frame:Show();
             end,
             ShowItem = function (itemLink, playerDetails)
+            -- print('LootMItemEntries:ShowItem');
                 local lastEntry;
                 for k,v in pairs(itemEntries) do
                     if (not v.IsShown()) then
@@ -322,6 +346,7 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 table.insert(itemEntries, LootItemEntryFactory(itemLink, lastEntry, playerDetails));
             end,
             GetItems = function ()
+            -- print('LootMItemEntries:GetItems');
                 local output = {};
                 for k,v in pairs(itemEntries) do
                     table.insert(output, v.GetItemLink());
@@ -329,6 +354,7 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 return output;
             end,
             SetPlayerRoll = function (itemLink, player, role, rollId, itemsTable, improvementRating)
+            -- print('LootMItemEntries:SetPlayerRoll');
                 for k,v in pairs(itemEntries) do
                     if (v.GetItemLink() == itemLink) then
                         v.SetPlayerRoll(player, role, rollId,  itemsTable, improvementRating);
@@ -336,6 +362,7 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 end
             end,
             IsNewLoot = function (lootTable)
+            -- print('LootMItemEntries:IsNewLoot');
                 for k,v in pairs(lootTable) do
                     local newLoot = true;
                     for l,i in pairs(itemEntries) do
