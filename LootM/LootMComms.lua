@@ -55,9 +55,9 @@ LootMComms =( function()
             -- if the item is not loaded, pend the message until the server can get us info about the item
             if (not GetItemInfo(itemLink)) then
                 debug('item not loaded, queing');
-                LootM.QueuePendingItem(itemLink);
                 table.insert(pendingMessages,
                 {
+                    LoadItems = { itemLink },
                     MessageType = newLootPrefix,
                     Message = message,
                     Sender = sender,
@@ -81,15 +81,15 @@ LootMComms =( function()
 
             -- We are not short-circuting this logic because we want to make sure all
             -- items are being requested from the server.
-            local requiresItemLoad = false;
+            local requiresItemLoad, loadItems = false, {};
             if (not GetItemInfo(itemLink)) then
                 requiresItemLoad = true;
-                LootM.QueuePendingItem(itemLink);
+                table.insert(loadItems, itemLink);
             end
             for k,item in pairs(playerItems) do
                 if (not GetItemInfo(item)) then
-                    LootM.QueuePendingItem(item);
                     requiresItemLoad = true;
+                    table.insert(loadItems, itemLink);
                 end
             end
 
@@ -97,6 +97,7 @@ LootMComms =( function()
                 debug('LootComms: roll recieved -> Requires item load');
                 table.insert(pendingMessages,
                 {
+                    LoadItems = loadItems,
                     MessageType = rollPrefix,
                     Message = message,
                     Sender = sender,
@@ -125,9 +126,20 @@ LootMComms =( function()
 
     local itemsLoaded = function()
         debug('items loaded');
-        if (#pendingMessages < 1) then return; end
+        if (not (#pendingMessages > 0)) then return; end
+
+        -- check each pending message and see that the items are loaded
+        for k,v in pairs(pendingMessages) do           
+            for i,j in pairs(pendingMessages[index].LoadItems) do
+                if (not GetItemInfo(j)) then 
+                    return;
+                end
+            end
+        end
+
         -- swap out the table so we can process the messages
-        local messages, pendingMessages = pendingMessages, {};
+        local messages = pendingMessages;
+        pendingMessages = {};
         -- re call into each handler, if the item is still not loaded it will reque the message.
         for k,v in pairs(messages) do
             local f = chatMessageHandlers[v.MessageType];

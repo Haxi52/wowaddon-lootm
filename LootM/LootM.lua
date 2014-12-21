@@ -11,7 +11,7 @@ LootMFrames = { };
 LootMEvents = { };
 LootMItemEvaluator = { };
 local pendingItems = {};
-
+local resumeLoadedItems;
 
 LootM = CreateFrame("FRAME", "LootM"), { };
 
@@ -44,10 +44,17 @@ LootM.Init = function ()
 end
 
 function LootMEvents:LOOT_OPENED(...)
+    local callNewLoot = function(t)
+        if (LootMItemEntries.IsNewLoot(t)) then
+            LootMComms.NewLoot(t);
+        end 
+    end
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = LootM.GetLootItems();
-    if (LootMItemEntries.IsNewLoot(lootTable)) then
-        LootMComms.NewLoot(lootTable);
+    if (lootTable) then 
+        callNewLoot(lootTable);
+    else
+        resumeLoadedItems = callNewLoot;
     end
 end
 
@@ -64,12 +71,7 @@ function LootMEvents:RAID_INSTANCE_WELCOME(...)
     LootM.Update();
 end
 function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
-    if (#pendingItems > 0) then
-        for k,v in pairs(pendingItems) do
-            if (not GetItemInfo(v)) then return; end
-        end
-    end
-    pendingItems = {};
+    CheckItemsLoaded();
     LootMComms.ItemsLoaded(...);
 end
 function LootMEvents:CHAT_MSG_ADDON(...)
@@ -93,19 +95,15 @@ for k, v in pairs(LootMEvents) do
 end
 
 LootM.IsEnabled = function()
-    -- for debugging
-    return true;
-    --return(IsInRaid() and 'master' == GetLootMethod())
+    return(IsInRaid() and 'master' == GetLootMethod())
 end
 
 LootM.IsLootMaster = function()
-    -- for debugging
-    return true;
---    local masterLooterId = select(3, GetLootMethod());
---    if masterLooterId then
---        return GetRaidRosterInfo(masterLooterId) == GetUnitName("player");
---    end
---    return false;
+    local masterLooterId = select(3, GetLootMethod());
+    if masterLooterId then
+        return GetRaidRosterInfo(masterLooterId) == GetUnitName("player");
+    end
+    return false;
 end
 
 LootM.QueuePendingItem = function (itemlink)
@@ -115,30 +113,54 @@ end
 
 LootM.GetLootItems = function () 
     local lootTable = { };
+    local requiresItemLoad = false;
     for i = 1, GetNumLootItems() do
         local itemLink = GetLootSlotLink(i);
         if (not itemLink) then
-            -- TODO: proper que this
             debug('item not loaded yet');
+            requiresItemLoad = true;
+            LootM.QueuePendingItem(itemLink);
             return nil;
-        end
-        _, _, itemRarity = GetItemInfo(itemLink);
-        if (itemRarity >= GetLootThreshold()) then
-            table.insert(lootTable, itemLink);
+        else
+            _, _, itemRarity = GetItemInfo(itemLink);
+            if (itemRarity >= GetLootThreshold()) then
+                table.insert(lootTable, itemLink);
+            end
         end
     end
+    if (requiresItemLoad) then return nil; end;
     return lootTable;
+end
+
+local function CheckItemsLoaded()
+    if (#pendingItems > 0) then
+        for k,v in pairs(pendingItems) do
+            if (not GetItemInfo(v)) then return; end
+        end
+    end
+    pendingItems = {};
+    if (resumeLoadedItems and type(resumeLoadedItems) == 'function') then
+        local f=resumeLoadedItems;
+        resumeLoadedItems= nil;
+        local lootTable = LootM.GetLootItems();
+        if (lootTable) then f(lootTable); end
+    end
 end
 
 LootM.ResetLoot = function ()
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = LootM.GetLootItems();
-    LootMComms.NewLoot(lootTable);
+    if (lootTable) then 
+        LootMComms.NewLoot(lootTable);
+    else
+        resumeLoadedItems = LootMComms.NewLoot;
+    end
 end
 
 LootM.AwardLoot = function(playerName, itemLink)
     if (not LootM.IsLootMaster()) then return; end
     local awardLoot = function () 
+        debug('award loot '..itemLink..' to player '..playerName);
         local lootIndex = 0;
         for i = 1, GetNumLootItems() do
             if (itemLink == GetLootSlotLink(i)) then
@@ -306,8 +328,10 @@ LootMItemEvaluator =( function()
         local playerItems = { };
 
         if (dataType == 'number') then
-            -- TODO: Player not equipped item crashes.
-            table.insert(playerItems, getPlayerInventoryItem(playerSlot));
+            local equippedItemLink = getPlayerInventoryItem(playerSlot);
+            if (equippedItemLink) then
+                table.insert(playerItems, equippedItemLink);
+            end
         elseif (dataType == 'table') then
             for k, v in pairs(playerSlot) do
                 local equippedItemLink = getPlayerInventoryItem(v);
@@ -452,8 +476,6 @@ end
 
 
 -- TODO: Accordian loot items (?)
--- Roll counters
--- edit stat weights
 -- Recieve rolls via tell
 -- Broadcast loot via tells to non-addon clients
 -- prevent need on non-usable items (Encounter Journal)
