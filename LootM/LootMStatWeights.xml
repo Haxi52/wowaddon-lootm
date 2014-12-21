@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://www.blizzard.com/wow/ui/ ..\..\FrameXML.old\UI.xsd">
   <Script file="LootMStatWeights.lua" />
   <Frame name="StatEditor" virtual="true">
-    <Size x="300" y="30" />
+    <Size x="250" y="30" />
     <Layers>
       <Layer>
         <FontString parentKey="Label" inherits="GameFontHighlightSmall" text="Name of stat" justifyH="RIGHT">
@@ -16,10 +16,10 @@
     </Layers>
     <Frames>
       <EditBox parentKey="Value" autoFocus="false" inherits="InputBoxTemplate">
-        <Size x="100" y="28" />
+        <Size x="50" y="28" />
         <Anchors>
           <Anchor point="LEFT">
-            <Offset x="120" />
+            <Offset x="110" />
           </Anchor>
         </Anchors>
         <Scripts>
@@ -32,11 +32,23 @@
   </Frame>
   <Frame name="LootMStatWeightEditor" parent="UIParent" hidden="true" toplevel="true" movable="true">
     <Size>
-      <AbsDimension x="350" y="450" />
+      <AbsDimension x="250" y="450" />
     </Size>
     <Anchors>
       <Anchor point="CENTER" />
     </Anchors>
+    <Layers>
+      <Layer>
+        <FontString parentKey="SpecializationName" inherits="GameFontNormal">
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset x="20" y="-15" />
+            </Anchor>
+          </Anchors>
+          <Size x="200" y="15" />
+        </FontString>
+      </Layer>
+    </Layers>
     <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background"
           edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
       <BackgroundInsets>

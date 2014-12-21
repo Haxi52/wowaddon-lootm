@@ -105,6 +105,8 @@ function LootMEvents.LootMStatWeightEditor_OnLoad()
                 x.Value:SetText(v);
             end
         end
+        local specName = select(2, GetSpecializationInfoByID(GetLootSpecialization()));
+        frame.SpecializationName:SetText(specName);
     end
 
     local function saveWeights()
