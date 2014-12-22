@@ -1,6 +1,6 @@
-print('[LootM] 0.0.15');
+print('[LootM] 0.0.16');
 
-seterrorhandler(print);
+--seterrorhandler(print);
 function debug(message)
     --print(message);
 end
@@ -148,7 +148,7 @@ LootM.AwardLoot = function(playerName, itemLink)
                 break;
             end
             if (candidate == playerWithOutServer) then
-                print('[LootM] Awarding ' .. itemLink .. ' to ' .. playerName);
+                --print('[LootM] Awarding ' .. itemLink .. ' to ' .. playerName);
                 GiveMasterLoot(lootIndex, i);
                 LootMComms.Award(itemLink, playerName);
                 return;
@@ -407,28 +407,28 @@ SlashCmdList["LOOTM"] = function(message)
     local rollType, name;
     if (string.sub(message, 1, 6) == 'config') then
         LootM.ShowConfig();
-    elseif (string.sub(message, 1, 4) == 'test') then
-        LootMComms.NewLoot( { string.sub(message, 5) });
-    elseif (string.sub(message, 1, 4) == 'need') then
-        name = string.sub(message, 6);
-        rollType = '1';
-    elseif (string.sub(message, 1, 4) == 'gree') then
-        name = string.sub(message, 7);
-        rollType = '2';
-    elseif (string.sub(message, 1, 5) == 'award') then
-        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
-    else
-        LootMItemEntries.Show();
-    end
+--    elseif (string.sub(message, 1, 4) == 'test') then
+--        LootMComms.NewLoot( { string.sub(message, 5) });
+--    elseif (string.sub(message, 1, 4) == 'need') then
+--        name = string.sub(message, 6);
+--        rollType = '1';
+--    elseif (string.sub(message, 1, 4) == 'gree') then
+--        name = string.sub(message, 7);
+--        rollType = '2';
+--    elseif (string.sub(message, 1, 5) == 'award') then
+--        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
+--    else
+--        LootMItemEntries.Show();
+--    end
 
-    if (rollType) then
-        local x = LootMItemEntries.GetItems();
-        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
-        LootMItemEntries.SetPlayerRoll(x[1],
-        name or 'TheNewGuy',
-        'DAMAGER', rollType,
-        playerDetails.PlayerItems,
-        playerDetails.ImprovementRaiting);
+--    if (rollType) then
+--        local x = LootMItemEntries.GetItems();
+--        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
+--        LootMItemEntries.SetPlayerRoll(x[1],
+--        name or 'TheNewGuy',
+--        'DAMAGER', rollType,
+--        playerDetails.PlayerItems,
+--        playerDetails.ImprovementRaiting);
     end
 end;
 
@@ -465,9 +465,14 @@ end
 -- spirit only to healers, bonus armor only to tanks (Encounter journal)
 -- Improvement ratings on trinkets?
 
+
+-- known issues:
+-- spacing of rolls after rolling multipule times, in groups > 5
+-- duplicate items don't show rolls for that item
+
 -- for debugging
-function PrintTable(t)
-    for k, v in pairs(t) do
-        print(k .. ": " .. v);
-    end
-end
+--function PrintTable(t)
+--    for k, v in pairs(t) do
+--        print(k .. ": " .. v);
+--    end
+--end

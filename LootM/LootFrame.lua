@@ -63,7 +63,7 @@ local playerFrameFactory = function(parent, index, playerName, role, rollId, ite
         setItemFrame(itemsTable[1], frame.EquippedItem1);
         setItemFrame(itemsTable[2], frame.EquippedItem2);
 
-        if (index < maxPlayerRollShown) then frame:Show(); end
+        if (index <= maxPlayerRollShown) then frame:Show(); end
         isShown = true;
     end;
 
@@ -72,6 +72,9 @@ local playerFrameFactory = function(parent, index, playerName, role, rollId, ite
     updateFrame();
     return {
         IsShown = function() return isShown; end,
+        IsVisible = function ()
+            return isShown and (index <= maxPlayerRollShown);
+        end,
         GetRoll = function()
             if (not isShown) then return nil; end;
             return rollId;
@@ -358,15 +361,8 @@ function LootMEvents.LootMLootFrame_OnLoad()
             end,
             SetPlayerRoll = function(itemLink, player, role, rollId, itemsTable, improvementRating)
                 debug('LootMItemEntries:SetPlayerRoll');
-                debug(itemLink .. ';' .. player .. ';' .. role .. ';' .. rollId .. ';');
-                for k, v in pairs(itemsTable) do
-                    debug(k .. ": " .. v);
-                end
                 for k, v in pairs(itemEntries) do
-                    debug(' my link: '..string.gsub(v.GetItemLink(), "\124", "\124\124"));
-                    debug(' re link: '..string.gsub(itemLink, "\124", "\124\124"));
                     if (v.GetItemLink() == itemLink) then
-                        debug('found that item!');
                         v.SetPlayerRoll(player, role, rollId, itemsTable, improvementRating);
                         return;
                     end
