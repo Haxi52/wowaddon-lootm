@@ -19,7 +19,7 @@ local LootItemEntryFactory;
 LootMItemEntries = { };
 
 -- closure of player frame (each player listed under the loot item)
-local playerFrameFactory = function(parent, index, playerName, role, rollId, itemsTable, improvementRating)
+local playerFrameFactory = function(parent, index, playerName, playerRole, rollId, itemsTable, improvementRating)
     debug('playerFrameFactory');
     local indexOffset = 22;
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
@@ -32,13 +32,14 @@ local playerFrameFactory = function(parent, index, playerName, role, rollId, ite
     end );
 
     local function setAnchor()
-        if (index > maxPlayerRollShown) then
+        if (index > maxPlayerRollShown or not isShown) then
             frame:Hide();
         elseif (isShown) then
             frame:ClearAllPoints();
             frame:SetPoint("TOPLEFT", parent.ItemDetails, "BOTTOMLEFT", 10, -((index - 1) * indexOffset));
             frame:Show();
         end
+        
     end;
 
     local function setItemFrame(itemId, button)
@@ -58,63 +59,55 @@ local playerFrameFactory = function(parent, index, playerName, role, rollId, ite
         frame.PlayerName:SetText(playerName);
         frame.RollTexture:SetTexture(rollTextures[rollId]);
         frame.ImprovementRating:SetText('[' .. improvementRating .. ']');
-        frame.RoleTexture:SetTexCoord(unpack((roleCoords[role] or roleCoords['other'])));
+        frame.RoleTexture:SetTexCoord(unpack((roleCoords[playerRole] or roleCoords['other'])));
         equippedItemLevel = 1000;
         setItemFrame(itemsTable[1], frame.EquippedItem1);
         setItemFrame(itemsTable[2], frame.EquippedItem2);
 
-        if (index <= maxPlayerRollShown) then frame:Show(); end
-        isShown = true;
     end;
 
 
-    setAnchor();
     updateFrame();
+    setAnchor();
+
     return {
         IsShown = function() return isShown; end,
-        IsVisible = function ()
-            return isShown and (index <= maxPlayerRollShown);
-        end,
-        GetRoll = function()
-            if (not isShown) then return nil; end;
-            return rollId;
-        end,
+        PlayerName = function() return playerName; end,
+        GetRoll = function() return rollId; end,
         GetSortOrder = function()
             if (not isShown) then return nil; end
             local r = tonumber(rollId);
-            if (r == 0) then return nil; end
+            if (r == 0) then r = 4; end -- force passes to show at the end
             return(r * 1000) + equippedItemLevel;
-        end,
-        GetItemLevel = function() return equippedItemLevel; end,
-        PlayerName = function()
-            if (not isShown) then return nil; end;
-            return playerName;
         end,
         SetIndex = function(i)
             debug('SetIndex');
             index = i;
             setAnchor();
         end,
-        -- role, rollId, item table, improvement rating
-        SetRoll = function(s, r, i, imp)
+        SetRoll = function(rollid)
             debug('SetRoll');
-            role = s;
-            rollId = r;
-            itemsTable = i;
-            improvementRating = imp;
+            rollId = rollid;
             updateFrame();
         end,
-        -- player name, role, rollId, item table, improvement rating
-        Update = function(player, s, r, i, imp)
+        SetInfo = function(playername, playerrole, rollid, itemstable, improvementrating, i)
             debug('Update');
-            rollId = r;
-            playerName = player;
-            role = s;
-            itemsTable = i;
-            improvementRating = imp;
+            playerName = playername;
+            rollId = rollid;
+            playerRole = playerrole;
+            itemsTable = itemstable;
+            improvementRating = improvementrating;
+            index = i;
+            isShown = true;
             updateFrame();
+            setAnchor();
         end,
-        Hide = function() isShown = false; frame:Hide(); end,
+        Hide = function() 
+            isShown = false; 
+            playerName = nil;
+            rollId = nil;
+            frame:Hide(); 
+        end,
         GetFrame = function() return frame; end,
         OnClick = function(callback)
             onClickCallback = callback;
@@ -259,6 +252,12 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
         end
     end;
 
+    local function updateAll()
+        sortPlayerTable();
+        updateHeight();
+        updateRollCount();
+    end
+
     local function assignLootClicker(playername)
         LootM.AwardLoot(playername, itemLink);
     end
@@ -286,29 +285,23 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
         GetFrame = function() return frame; end,
         SetPlayerRoll = function(player, role, rollId, itemsTable, improvementRating)
             debug('LootItemEntryFactory:SetPlayerRoll');
-            local index = 1;
+            local index = 0;
             for k, v in pairs(playerFrames) do
+                index = index + 1;
                 if (v.PlayerName() == player) then
-                    v.SetRoll(role, rollId, itemsTable, improvementRating);
-                    sortPlayerTable();
-                    updateHeight();
-                    updateRollCount();
+                    v.SetRoll(rollId);
+                    updateAll();
                     return;
                 elseif (not v.IsShown()) then
-                    v.Update(player, role, rollId, itemsTable, improvementRating);
-                    sortPlayerTable();
-                    updateHeight();
-                    updateRollCount();
+                    v.SetInfo(player, role, rollId, itemsTable, improvementRating, index);
+                    updateAll();
                     return;
                 end
-                index = index + 1;
             end
             local newPlayerFrame = playerFrameFactory(frame, index, player, role, rollId, itemsTable, improvementRating);
             table.insert(playerFrames, newPlayerFrame);
             newPlayerFrame.OnClick(assignLootClicker);
-            sortPlayerTable();
-            updateHeight();
-            updateRollCount();
+            updateAll();
         end,
         AwardItem = function(player)
             debug('LootItemEntryFactory:AwardItem');
