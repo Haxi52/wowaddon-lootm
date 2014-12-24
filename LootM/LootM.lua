@@ -1,8 +1,8 @@
-print('[LootM] 0.0.17');
+print('[LootM] 0.0.18');
 
 --seterrorhandler(print);
 function debug(message)
-    --print(message);
+    -- print(message);
 end
 
 ConfirmLootAwardDialg = 'LootM_ConfirmAwardLoot';
@@ -63,7 +63,7 @@ function LootMEvents:RAID_INSTANCE_WELCOME(...)
     LootM.Update();
 end
 function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
-    if(lootIsntReadyFlag) then
+    if (lootIsntReadyFlag) then
         lootIsntReadyFlag = false;
         LootMEvents.LOOT_READY(...);
     else
@@ -148,7 +148,6 @@ LootM.AwardLoot = function(playerName, itemLink)
                 break;
             end
             if (candidate == playerWithOutServer) then
-                --print('[LootM] Awarding ' .. itemLink .. ' to ' .. playerName);
                 GiveMasterLoot(lootIndex, i);
                 LootMComms.Award(itemLink, playerName);
                 return;
@@ -160,6 +159,14 @@ LootM.AwardLoot = function(playerName, itemLink)
     if (dialog) then
         dialog.data = awardLoot;
     end
+end
+
+LootM.GetLootSpecId = function()
+    local specId = GetLootSpecialization();
+    if (specId == 0) then
+        specId = GetSpecializationInfo(GetSpecialization());
+    end
+    return specId;
 end
 
 function RegisterFrame(frame)
@@ -341,7 +348,6 @@ LootMItemEvaluator =( function()
             value =(newValue - equippedValue) / equippedValue;
             value = math.max(0, value);
             value = math.floor(value * 100);
-            -- 2x the % value
         end
         return value;
     end
@@ -380,7 +386,6 @@ LootMItemEvaluator =( function()
             -- calculate an improvement rating agaist the player equipped items
             local improvementRating =
             calculateImprovementRating(itemLink, playerItems, LootM.GetPlayerStatWeights(), lootItemType, playerItemType);
-            local improvementRating = 0;
             return { PlayerItems = playerItems, ImprovementRaiting = improvementRating };
         end,
         GetItemValue = function(itemLink, weightTable)
@@ -407,29 +412,31 @@ SlashCmdList["LOOTM"] = function(message)
     local rollType, name;
     if (string.sub(message, 1, 6) == 'config') then
         LootM.ShowConfig();
-    elseif (string.sub(message, 1, 4) == 'test') then
-        LootMComms.NewLoot( { string.sub(message, 5) });
-    elseif (string.sub(message, 1, 4) == 'need') then
-        name = string.sub(message, 6);
-        rollType = '1';
-    elseif (string.sub(message, 1, 4) == 'gree') then
-        name = string.sub(message, 7);
-        rollType = '2';
-    elseif (string.sub(message, 1, 5) == 'award') then
-        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
     else
         LootMItemEntries.Show();
     end
 
-    if (rollType) then
-        local x = LootMItemEntries.GetItems();
-        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
-        LootMItemEntries.SetPlayerRoll(x[1],
-        name or 'TheNewGuy',
-        'DAMAGER', rollType,
-        playerDetails.PlayerItems,
-        playerDetails.ImprovementRaiting);
-    end
+--    elseif (string.sub(message, 1, 4) == 'test') then
+--        LootMComms.NewLoot( { string.sub(message, 5) });
+--    elseif (string.sub(message, 1, 4) == 'need') then
+--        name = string.sub(message, 6);
+--        rollType = '1';
+--    elseif (string.sub(message, 1, 4) == 'gree') then
+--        name = string.sub(message, 7);
+--        rollType = '2';
+--    elseif (string.sub(message, 1, 5) == 'award') then
+--        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
+
+
+--    if (rollType) then
+--        local x = LootMItemEntries.GetItems();
+--        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
+--        LootMItemEntries.SetPlayerRoll(x[1],
+--        name or 'TheNewGuy',
+--        'DAMAGER', rollType,
+--        playerDetails.PlayerItems,
+--        playerDetails.ImprovementRaiting);
+--    end
 end;
 
 -- table sort iterator
@@ -458,7 +465,6 @@ function spairs(t, order)
 end
 
 
--- TODO: Accordian loot items (?)
 -- Recieve rolls via tell
 -- Broadcast loot via tells to non-addon clients
 -- prevent need on non-usable items (Encounter Journal)
@@ -467,12 +473,11 @@ end
 
 
 -- known issues:
--- spacing of rolls after rolling multipule times, in groups > 5
 -- duplicate items don't show rolls for that item
 
 -- for debugging
---function PrintTable(t)
+-- function PrintTable(t)
 --    for k, v in pairs(t) do
 --        print(k .. ": " .. v);
 --    end
---end
+-- end

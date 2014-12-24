@@ -49,7 +49,7 @@ local socketStatBudgt = 50;
 LootMStatWeights = {};
 
 LootM.GetPlayerStatWeights = function () 
-    local specid = GetLootSpecialization();
+    local specid = LootM.GetLootSpecId();
     if (not LootMStatWeights[specid]) then
         LootMStatWeights[specid] = defaultStatWeights;
     end
@@ -57,7 +57,7 @@ LootM.GetPlayerStatWeights = function ()
 end
 
 LootM.SetPlayerStatWeights = function(weightsTable)
-    local specid = GetLootSpecialization();
+    local specid = LootM.GetLootSpecId();
     -- only 1 primary stat gets saved (the others are zeroed)
     local highPrimaryStat, primaryStatName;
     for i,k in pairs(primaryStats) do
@@ -105,7 +105,7 @@ function LootMEvents.LootMStatWeightEditor_OnLoad()
                 x.Value:SetText(v);
             end
         end
-        local specName = select(2, GetSpecializationInfoByID(GetLootSpecialization()));
+        local specName = select(2, GetSpecializationInfoByID(LootM.GetLootSpecId()));
         frame.SpecializationName:SetText(specName);
     end
 

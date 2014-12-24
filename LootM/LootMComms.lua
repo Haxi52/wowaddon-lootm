@@ -2,9 +2,9 @@
 
 LootMComms =( function()
 
-    local raidMessageType = "GUILD";
+    --local raidMessageType = "OFFICER";
     -- changed for testing
-    --local raidMessageType = "RAID";
+    local raidMessageType = "RAID";
     local newLootPrefix = 'LootMNew';
     local rollPrefix = 'LootMRoll';
     local awardPrefix = 'LootMAward';
@@ -29,6 +29,7 @@ LootMComms =( function()
         LootMItemEntries.Hide();
         for k,itemLink in pairs(newLootMessageSpool) do
             local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(itemLink);
+
             LootMItemEntries.ShowItem(itemLink, playerDetails);    
         end    
         LootMItemEntries.Show();
@@ -120,6 +121,7 @@ LootMComms =( function()
 
     -- main event handler which dispatches the message to a handler based on prefix
     local chatMessageEvent = function(prefix, message, distType, sender)
+        if (not raidMessageType == distType) then return end;
         local f = chatMessageHandlers[prefix];
         if (f) then f(message, sender); end;
     end;
@@ -170,7 +172,7 @@ LootMComms =( function()
         -- singles a player's roll selection on a item being looted
         Roll = function(rollId, itemLink, playerDetails)
             debug('LootCooms: Roll');
-            local role = select(6, GetSpecializationInfoByID(GetLootSpecialization()));
+            local role = select(6, GetSpecializationInfoByID(LootM.GetLootSpecId()));
             local message = { rollId, role, itemLink, playerDetails.ImprovementRaiting };
             for k,v in pairs(playerDetails.PlayerItems) do
                 table.insert(message, v);
