@@ -130,7 +130,11 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
     local playerFrames = { };
     local entryContainer = LootMFrames['LootMLootFrame'].ScrollFrame.ItemEntryContainer;
     local frame = CreateFrame('Button', nil, entryContainer, 'ItemEntryDetailsTemplate');
-    local rollButtons = { frame.ItemDetails.needButton, frame.ItemDetails.greedButton, frame.ItemDetails.passButton };
+    local rollButtons = { 
+        frame.ItemDetails.needButton, 
+        frame.ItemDetails.greedButton, 
+        frame.ItemDetails.passButton 
+    };
     if (previousEntry) then
         frame:SetPoint("TOPLEFT", previousEntry.GetFrame(), "BOTTOMLEFT");
     else
@@ -155,11 +159,19 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
             b:GetNormalTexture():SetDesaturated(false);
             b:GetHighlightTexture():SetDesaturated(false);
             b:GetPushedTexture():SetDesaturated(false);
+            b.selectedTexture:Hide();
         end );
     end
 
     local rollButtonClickHandler = function(self)
         LootMComms.Roll(self:GetID(), itemLink, PlayerDetails);
+        ForEachRollButton(function (b) 
+            if (self == b) then
+                b.selectedTexture:Show();
+            else       
+                b.selectedTexture:Hide();
+            end
+        end);
         rollChances = rollChances - 1;
         if (rollChances <= 0) then
             turnOffRollButtons();

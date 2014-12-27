@@ -67,11 +67,11 @@
                 </Anchor>
               </Anchors>
             </FontString>
-            <Texture parentKey="ImprovementRatingBorder" file="Interface\buttons\checkbuttonglow">
+            <Texture parentKey="ImprovementRatingBorder" file="Interface\BarberShop\UI-BARBERSHOP">
               <Size x="64" y="64" />
               <Anchors>
                 <Anchor point="TOPRIGHT">
-                  <Offset x="6" y="5"/>
+                  <Offset x="20" y="-7"/>
                 </Anchor>
               </Anchors>
             </Texture>
@@ -79,7 +79,7 @@
               <Size x="64" y="64" />
               <Anchors>
                 <Anchor point="TOPRIGHT">
-                  <Offset x="6" y="5"/>
+                  <Offset x="6" y="4"/>
                 </Anchor>
               </Anchors>
             </FontString>
@@ -93,6 +93,16 @@
               </Anchor>
             </Anchors>
             <Layers>
+              <Layer level="BACKGROUND">
+                <Texture file="Interface\achievementframe\ui-achievement-iconframe" parentKey="selectedTexture" hidden="true">
+                  <Size x="80" y="80" />
+                  <Anchors>
+                    <Anchor point="CENTER">
+                      <Offset x="18" y="-15"/>
+                    </Anchor>
+                  </Anchors>
+                </Texture>
+              </Layer>
               <Layer>
                 <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
                   <Size x="15" y="15" />
@@ -118,6 +128,16 @@
               </Anchor>
             </Anchors>
             <Layers>
+              <Layer level="BACKGROUND">
+                <Texture file="Interface\achievementframe\ui-achievement-iconframe" parentKey="selectedTexture" hidden="true">
+                  <Size x="80" y="80" />
+                  <Anchors>
+                    <Anchor point="CENTER">
+                      <Offset x="18" y="-15"/>
+                    </Anchor>
+                  </Anchors>
+                </Texture>
+              </Layer>
               <Layer>
                 <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
                   <Size x="15" y="15" />
@@ -139,10 +159,20 @@
           <Button inherits="LootRollButtonTemplate" parentKey="passButton" id="0">
             <Anchors>
               <Anchor point="TOPRIGHT">
-                <Offset x="-48" y="-12"/>
+                <Offset x="-48" y="-10"/>
               </Anchor>
             </Anchors>
             <Layers>
+              <Layer level="BACKGROUND">
+                <Texture file="Interface\achievementframe\ui-achievement-iconframe" parentKey="selectedTexture" hidden="true">
+                  <Size x="80" y="80" />
+                  <Anchors>
+                    <Anchor point="CENTER">
+                      <Offset x="18" y="-18"/>
+                    </Anchor>
+                  </Anchors>
+                </Texture>
+              </Layer>
               <Layer>
                 <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
                   <Size x="15" y="15" />

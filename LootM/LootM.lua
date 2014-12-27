@@ -1,4 +1,4 @@
-print('[LootM] 0.0.18');
+print('[LootM] 0.0.19');
 
 --seterrorhandler(print);
 function debug(message)
@@ -416,7 +416,7 @@ SlashCmdList["LOOTM"] = function(message)
         LootMItemEntries.Show();
     end
 
---    elseif (string.sub(message, 1, 4) == 'test') then
+--    if (string.sub(message, 1, 4) == 'test') then
 --        LootMComms.NewLoot( { string.sub(message, 5) });
 --    elseif (string.sub(message, 1, 4) == 'need') then
 --        name = string.sub(message, 6);
@@ -427,7 +427,7 @@ SlashCmdList["LOOTM"] = function(message)
 --    elseif (string.sub(message, 1, 5) == 'award') then
 --        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
 
-
+--    end
 --    if (rollType) then
 --        local x = LootMItemEntries.GetItems();
 --        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
