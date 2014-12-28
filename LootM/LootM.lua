@@ -1,4 +1,4 @@
-print('[LootM] 0.0.19');
+print('[LootM] 0.0.21');
 
 --seterrorhandler(print);
 function debug(message)
@@ -47,6 +47,8 @@ function LootMEvents:LOOT_READY(...)
     if (not lootTable) then return; end
     if (LootMItemEntries.IsNewLoot(lootTable)) then
         LootMComms.NewLoot(lootTable);
+    else
+        LootMItemEntries.Show();
     end
 end
 

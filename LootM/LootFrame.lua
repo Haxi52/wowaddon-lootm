@@ -164,6 +164,7 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
     end
 
     local rollButtonClickHandler = function(self)
+        PlaySound("igMainMenuOptionCheckBoxOn");
         LootMComms.Roll(self:GetID(), itemLink, PlayerDetails);
         ForEachRollButton(function (b) 
             if (self == b) then

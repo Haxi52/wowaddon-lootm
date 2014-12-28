@@ -34,6 +34,7 @@ LootMComms =( function()
         end    
         LootMItemEntries.Show();
         print('[LootM] Staring new loot session. Take a gander');
+        PlaySound("LOOTWINDOWOPENEMPTY");
     end
 
     
