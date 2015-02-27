@@ -2,7 +2,7 @@
 
 LootMComms =( function()
 
-    -- local raidMessageType = "OFFICER";
+    --local raidMessageType = "OFFICER";
     -- changed for testing
     local raidMessageType = "RAID";
     local newLootPrefix = 'LootMNew';
@@ -33,7 +33,7 @@ LootMComms =( function()
             LootMItemEntries.ShowItem(itemLink, playerDetails);    
         end    
         LootMItemEntries.Show();
-        print('[LootM] Staring new loot session. Take a gander');
+        print('[LootM] Staring new loot session. ' .. LootM.RandomLootText());
         PlaySound("LOOTWINDOWOPENEMPTY");
     end
 

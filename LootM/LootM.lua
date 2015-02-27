@@ -1,5 +1,4 @@
-print('[LootM] 0.0.21');
-
+local lootmVersion = '[LootM] 0.0.22';
 --seterrorhandler(print);
 function debug(message)
     -- print(message);
@@ -140,7 +139,7 @@ LootM.AwardLoot = function(playerName, itemLink)
             end
         end
         if (lootIndex == 0) then
-            print('[LootM] Unable to find loot item!');
+            print('[LootM] Unable to find loot item! (are you looting boss?)');
         end
 
         for i = 1, 40 do
@@ -170,6 +169,16 @@ LootM.GetLootSpecId = function()
     end
     return specId;
 end
+
+local lootText = { 
+    'Take a gander', 
+    'Ooooh! shiiiny!', 
+    'May the odds ever be in your favor', 
+    'Feast your eyes!' };
+
+LootM.RandomLootText = function () 
+    return lootText[math.random(#lootText)];
+end;
 
 function RegisterFrame(frame)
     if (frame == nil or not frame:GetName()) then return; end
@@ -414,6 +423,9 @@ SlashCmdList["LOOTM"] = function(message)
     local rollType, name;
     if (string.sub(message, 1, 6) == 'config') then
         LootM.ShowConfig();
+    elseif (string.sub(message, 1, 1) == 'v' or
+             string.sub(message, 1, 7) == 'version') then
+        print(lootmVersion);
     else
         LootMItemEntries.Show();
     end

@@ -104,8 +104,8 @@
                 </Texture>
               </Layer>
               <Layer>
-                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
-                  <Size x="15" y="15" />
+                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="RIGHT" text="" outline="THICK">
+                  <Size x="20" y="15" />
                   <Anchors>
                     <Anchor point="BOTTOMRIGHT"/>
                   </Anchors>
@@ -139,8 +139,8 @@
                 </Texture>
               </Layer>
               <Layer>
-                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
-                  <Size x="15" y="15" />
+                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="RIGHT" text="" outline="THICK">
+                  <Size x="20" y="15" />
                   <Anchors>
                     <Anchor point="BOTTOMRIGHT"/>
                   </Anchors>
@@ -149,7 +149,7 @@
             </Layers>
             <Scripts>
               <OnLoad>
-                self.tooltipText="Off Spec/Minor upgrade";
+                self.tooltipText="Off Spec";
               </OnLoad>
             </Scripts>
             <NormalTexture file="Interface\Buttons\UI-GroupLoot-Coin-Up"/>
@@ -174,8 +174,8 @@
                 </Texture>
               </Layer>
               <Layer>
-                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" outline="THICK">
-                  <Size x="15" y="15" />
+                <FontString parentKey="Label" inherits="GameFontHighlightSmall" justifyH="RIGHT" text="" outline="THICK">
+                  <Size x="22" y="15" />
                   <Anchors>
                     <Anchor point="BOTTOMRIGHT">
                       <Offset y="-2" />
