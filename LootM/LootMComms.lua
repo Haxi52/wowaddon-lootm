@@ -1,5 +1,5 @@
 -- fortunatly the communication requirements for this are fairly straight forward, so the formatting is rutamentry
-
+local versionCheck = false;
 LootMComms =( function()
 
     --local raidMessageType = "OFFICER";
@@ -8,6 +8,8 @@ LootMComms =( function()
     local newLootPrefix = 'LootMNew';
     local rollPrefix = 'LootMRoll';
     local awardPrefix = 'LootMAward';
+    local versionPingPrefix = 'LootMvPing';
+    local versionPingPrefix = 'LootMvPong';
     local newLootMessageSpool = {};
     local pendingMessages = { };
 
@@ -118,6 +120,18 @@ LootMComms =( function()
             LootMItemEntries.AwardItem(itemLink, awardee);
             print(awardee..' was awarded '..itemLink);
         end,
+        [versionPingPrefix] = function(message, sender)
+            SendAddonMessage(versionPongPrefix, lootmVersion, raidMessageType);
+        end,
+        [versionPongPrefix] = function(message, sender)
+            LootM.RaidVersion[sender] = message;
+            local otherVersion = tonumber(message:gsub("%.", ""));
+            local myVersion = tonumber(GetAddOnMetadata("LootM", "Version"):gsub("%.", ""));
+            if (otherVersion > myVersion and not versionCheck) then
+                versionCheck = true;
+                print("[LootM] A new version is available! (" .. message .. ")");
+            end
+        end,
     };
 
     -- main event handler which dispatches the message to a handler based on prefix
@@ -185,8 +199,13 @@ LootMComms =( function()
             local message = { awardee, itemLink }
             SendAddonMessage(awardPrefix, table.concat(message, ';'), raidMessageType);
         end,
+        VersionCheck = function()
+            SendAddonMessage(versionPingPrefix, lootmVersion, raidMessageType);
+        end,
+
         MessageRecieved = chatMessageEvent,-- proxy to publically expose the handler
         ItemsLoaded = itemsLoaded, -- proxy for even when item data is received from server
+
     };
 
 end )();

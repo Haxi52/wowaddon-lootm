@@ -1,5 +1,5 @@
-local lootmVersion = '[LootM] 0.0.22';
---seterrorhandler(print);
+ 
+-- seterrorhandler(print);
 function debug(message)
     -- print(message);
 end
@@ -12,6 +12,7 @@ LootMItemEvaluator = { };
 LootM = CreateFrame("FRAME", "LootM"), { };
 
 LootMFrames["LootM"] = LootM;
+LootM.RaidVersion = { };
 
 LootM.Update = function()
     local resetButton = LootMFrames["LootMLootFrame"].ResetButton;
@@ -19,6 +20,21 @@ LootM.Update = function()
         resetButton:Show();
     else
         resetButton:Hide();
+    end
+
+    -- update the version table based on raid roster.
+    if IsInRaid() then
+        local versionTable = { }
+        for i = 1, MAX_RAID_MEMBERS do
+            local name = GetRaidRosterInfo(i);
+            -- TODO: Ensure name here is formatted the same as version checks in LootMComms. 
+            if (name ~= nil) then
+                versionTable[name] = LootM.RaidVersion[name] or "LootM not found";
+            end
+        end
+        LootM.RaidVersion = versionTable;
+    else
+        LootM.RaidVersion = {};
     end
 end
 
@@ -39,6 +55,11 @@ LootM.Init = function()
     LootM.Update();
 end
 
+LootM.PrintRaidAudit = function ()
+    print("[LootM] addon raid audit");
+    PrintTable(LootM.RaidVersion);
+end
+
 function LootMEvents:LOOT_READY(...)
     debug("trying to loot...");
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
@@ -56,12 +77,14 @@ function LootMEvents:LOOT_CLOSED(...)
 end
 function LootMEvents:GROUP_ROSTER_UPDATE(...)
     LootM.Update();
+    LootMComms.VersionCheck();
 end
 function LootMEvents:PARTY_LOOT_METHOD_CHANGED(...)
     LootM.Update();
 end
 function LootMEvents:RAID_INSTANCE_WELCOME(...)
     LootM.Update();
+    LootMComms.VersionCheck();
 end
 function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
     if (lootIsntReadyFlag) then
@@ -170,13 +193,14 @@ LootM.GetLootSpecId = function()
     return specId;
 end
 
-local lootText = { 
-    'Take a gander', 
-    'Ooooh! shiiiny!', 
-    'May the odds ever be in your favor', 
-    'Feast your eyes!' };
+local lootText = {
+    'Take a gander',
+    'Ooooh! shiiiny!',
+    'May the odds ever be in your favor',
+    'Feast your eyes!'
+};
 
-LootM.RandomLootText = function () 
+LootM.RandomLootText = function()
     return lootText[math.random(#lootText)];
 end;
 
@@ -424,33 +448,35 @@ SlashCmdList["LOOTM"] = function(message)
     if (string.sub(message, 1, 6) == 'config') then
         LootM.ShowConfig();
     elseif (string.sub(message, 1, 1) == 'v' or
-             string.sub(message, 1, 7) == 'version') then
-        print(lootmVersion);
+        string.sub(message, 1, 7) == 'version') then
+        print("[LootM] " .. GetAddOnMetadata("LootM", "Version"));
+    elseif (string.sub(message, 1, 5) == "audit") then
+        LootM.PrintRaidAudit();
     else
         LootMItemEntries.Show();
     end
 
---    if (string.sub(message, 1, 4) == 'test') then
---        LootMComms.NewLoot( { string.sub(message, 5) });
---    elseif (string.sub(message, 1, 4) == 'need') then
---        name = string.sub(message, 6);
---        rollType = '1';
---    elseif (string.sub(message, 1, 4) == 'gree') then
---        name = string.sub(message, 7);
---        rollType = '2';
---    elseif (string.sub(message, 1, 5) == 'award') then
---        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
+    --    if (string.sub(message, 1, 4) == 'test') then
+    --        LootMComms.NewLoot( { string.sub(message, 5) });
+    --    elseif (string.sub(message, 1, 4) == 'need') then
+    --        name = string.sub(message, 6);
+    --        rollType = '1';
+    --    elseif (string.sub(message, 1, 4) == 'gree') then
+    --        name = string.sub(message, 7);
+    --        rollType = '2';
+    --    elseif (string.sub(message, 1, 5) == 'award') then
+    --        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
 
---    end
---    if (rollType) then
---        local x = LootMItemEntries.GetItems();
---        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
---        LootMItemEntries.SetPlayerRoll(x[1],
---        name or 'TheNewGuy',
---        'DAMAGER', rollType,
---        playerDetails.PlayerItems,
---        playerDetails.ImprovementRaiting);
---    end
+    --    end
+    --    if (rollType) then
+    --        local x = LootMItemEntries.GetItems();
+    --        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
+    --        LootMItemEntries.SetPlayerRoll(x[1],
+    --        name or 'TheNewGuy',
+    --        'DAMAGER', rollType,
+    --        playerDetails.PlayerItems,
+    --        playerDetails.ImprovementRaiting);
+    --    end
 end;
 
 -- table sort iterator
@@ -479,6 +505,12 @@ function spairs(t, order)
 end
 
 
+ function PrintTable(t)
+    for k, v in pairs(t) do
+        print(k .. ": " .. v);
+    end
+ end
+
 -- Recieve rolls via tell
 -- Broadcast loot via tells to non-addon clients
 -- prevent need on non-usable items (Encounter Journal)
@@ -488,10 +520,3 @@ end
 
 -- known issues:
 -- duplicate items don't show rolls for that item
-
--- for debugging
--- function PrintTable(t)
---    for k, v in pairs(t) do
---        print(k .. ": " .. v);
---    end
--- end
