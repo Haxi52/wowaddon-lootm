@@ -114,7 +114,7 @@ function LootMEvents.LootMStatWeightEditor_OnLoad()
         for k,v in pairs(weights) do
             local x = statFrames[k];
             if (x) then
-                weights[k] = x.Value:GetNumber();
+                weights[k] = tonumber(string.format("%.2f",  x.Value:GetNumber()));
             end
         end
         LootM.SetPlayerStatWeights(weights);
