@@ -57,7 +57,7 @@ local playerFrameFactory = function(parent, index, playerName, playerRole, rollI
     end
 
     local function updateFrame()
-        frame.PlayerName:SetText(playerName);
+        frame.PlayerName:SetText(Ambiguate(playerName, "none"));
         frame.RollTexture:SetTexture(rollTextures[rollId]);
         frame.ImprovementRating:SetText('[' .. improvementRating .. ']');
         frame.RoleTexture:SetTexCoord(unpack((roleCoords[playerRole] or roleCoords['other'])));
