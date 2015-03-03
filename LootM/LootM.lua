@@ -76,14 +76,18 @@ function LootMEvents:LOOT_CLOSED(...)
 end
 function LootMEvents:GROUP_ROSTER_UPDATE(...)
     LootM.Update();
-    LootMComms.VersionCheck();
+    if IsInRaid() then
+        LootMComms.VersionCheck();
+    end
 end
 function LootMEvents:PARTY_LOOT_METHOD_CHANGED(...)
     LootM.Update();
 end
 function LootMEvents:RAID_INSTANCE_WELCOME(...)
     LootM.Update();
-    LootMComms.VersionCheck();
+    if IsInRaid() then
+        LootMComms.VersionCheck();
+    end
 end
 function LootMEvents:GET_ITEM_INFO_RECEIVED(...)
     if (lootIsntReadyFlag) then

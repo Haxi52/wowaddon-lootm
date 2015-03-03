@@ -1,5 +1,9 @@
 -- fortunatly the communication requirements for this are fairly straight forward, so the formatting is rutamentry
-local versionCheck = false;
+
+-- prevents version check from spamming raid group
+local versionCommCheck = false;
+-- prevents version update notices from spamming chat log
+local versionNotice = false;
 LootMComms =( function()
 
     --local raidMessageType = "OFFICER";
@@ -130,8 +134,8 @@ LootMComms =( function()
             LootM.RaidVersion[sender] = "v"..message;
             local otherVersion = tonumber(message:gsub("%.", ""));
             local myVersion = tonumber(GetAddOnMetadata("LootM", "Version"):gsub("%.", ""));
-            if (otherVersion > myVersion and not versionCheck) then
-                versionCheck = true;
+            if (otherVersion > myVersion and not versionNotice) then
+                versionNotice = true;
                 print("[LootM] A new version is available! (" .. message .. ")");
             end
         end,
@@ -203,6 +207,8 @@ LootMComms =( function()
             SendAddonMessage(awardPrefix, table.concat(message, ';'), raidMessageType);
         end,
         VersionCheck = function()
+            if (versionCommCheck) then return; end;
+            versionCommCheck = true;
             SendAddonMessage(versionPingPrefix, lootmVersion, raidMessageType);
         end,
 
