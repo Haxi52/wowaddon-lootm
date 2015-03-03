@@ -23,8 +23,7 @@ local playerFrameFactory = function(parent, index, playerName, playerRole, rollI
     debug('playerFrameFactory');
     local indexOffset = 22;
     local frame = CreateFrame('Button', nil, parent, 'PlayerRollDetail');
-    local isShown = false;
-    local enabled = true;
+    local isShown = true;
     local equippedItemLevel = 1000;
     local onClickCallback;
 
@@ -33,7 +32,7 @@ local playerFrameFactory = function(parent, index, playerName, playerRole, rollI
     end );
 
     local function setAnchor()
-        if (index > maxPlayerRollShown or not isShown or not enabled) then
+        if (index > maxPlayerRollShown or not isShown) then
             frame:Hide();
         elseif (isShown) then
             frame:ClearAllPoints();
@@ -72,8 +71,7 @@ local playerFrameFactory = function(parent, index, playerName, playerRole, rollI
     setAnchor();
 
     return {
-        IsShown = function() return isShown and enabled; end,
-        IsEnabled = function() return enabled; end,
+        IsShown = function() return isShown; end,
         PlayerName = function() return playerName; end,
         GetRoll = function() return rollId; end,
         GetSortOrder = function()
@@ -101,16 +99,12 @@ local playerFrameFactory = function(parent, index, playerName, playerRole, rollI
             itemsTable = itemstable;
             improvementRating = improvementrating;
             index = i;
-            enabled = true;
+            isShown = true;
             updateFrame();
             setAnchor();
         end,
-        Show = function()
-            isShown = true;
-        end,
         Hide = function()
             isShown = false;
-            enabled = false;
             playerName = nil;
             rollId = nil;
             frame:Hide();
@@ -131,7 +125,6 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
     local defaultFrameHeight = 52;
     local PlayerDetails = playerDetails;
     local isShown = true;
-    local hasRolled = false;
     local rollChances = maxRollChances;
     local itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
     GetItemInfo(e);
@@ -184,10 +177,6 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
         rollChances = rollChances - 1;
         if (rollChances <= 0) then
             turnOffRollButtons();
-        end;
-        hasRolled = true;
-        for k, v in pairs(playerFrames) do
-            if (v.IsEnabled()) then v.Show(); end;
         end;
     end;
 
@@ -249,14 +238,15 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
 
     local function updateHeight()
         debug('LootItemEntryFactory:updateHeight');
-        local playerCount = 0;
-        for k, v in pairs(playerFrames) do
-            if (v.IsShown()) then
-                playerCount = playerCount + 1;
-            end
-        end;
-        playerCount = math.min(playerCount, maxPlayerRollShown);
-        frame:SetHeight((playerCount * 22) + defaultFrameHeight);
+--        local playerCount = 0;
+--        for k, v in pairs(playerFrames) do
+--            if (v.IsShown()) then
+--                playerCount = playerCount + 1;
+--            end
+--        end;
+--        playerCount = math.min(playerCount, maxPlayerRollShown);
+--        frame:SetHeight((playerCount * 22) + defaultFrameHeight);
+          frame:SetHeight((maxPlayerRollShown * 22) + defaultFrameHeight);
     end;
 
     local function sortPlayerTable()
@@ -279,14 +269,14 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
 
     local function updateAll()
         sortPlayerTable();
-        updateHeight();
+        --updateHeight();
         updateRollCount();
     end
 
     local function assignLootClicker(playername)
         LootM.AwardLoot(playername, itemLink);
     end
-
+    updateHeight();
     return {
         GetItemLink = function() return itemLink; end,
         IsShown = function() return isShown; end,
@@ -298,9 +288,8 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
             rollChances = maxRollChances;
             turnOnRollButtons();
             populateFrame();
-            updateHeight();
+            --updateHeight();
             isShown = true;
-            hasRolled = false;
         end,
         Hide = function()
             debug('LootItemEntryFactory:Hide');
@@ -316,12 +305,10 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
                 index = index + 1;
                 if (v.PlayerName() == player) then
                     v.SetRoll(rollId);
-                    if (hasRolled) then v.Show(); end;
                     updateAll();
                     return;
                 elseif (not v.IsShown()) then
                     v.SetInfo(player, role, rollId, itemsTable, improvementRating, index);
-                    if (hasRolled) then v.Show(); end;
                     updateAll();
                     return;
                 end
@@ -329,7 +316,6 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
             local newPlayerFrame = playerFrameFactory(frame, index, player, role, rollId, itemsTable, improvementRating);
             table.insert(playerFrames, newPlayerFrame);
             newPlayerFrame.OnClick(assignLootClicker);
-            if (hasRolled) then newPlayerFrame.Show(); end;
             updateAll();
         end,
         AwardItem = function(player)
@@ -359,6 +345,7 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 frame:Hide();
             end,
             Show = function()
+                frame.ScrollFrame.Slider:SetValue(0);
                 frame:Show();
             end,
             ShowItem = function(itemLink, playerDetails)

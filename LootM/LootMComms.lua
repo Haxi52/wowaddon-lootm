@@ -9,7 +9,7 @@ LootMComms =( function()
     local rollPrefix = 'LootMRoll';
     local awardPrefix = 'LootMAward';
     local versionPingPrefix = 'LootMvPing';
-    local versionPingPrefix = 'LootMvPong';
+    local versionPongPrefix = 'LootMvPong';
     local newLootMessageSpool = {};
     local pendingMessages = { };
 
@@ -121,10 +121,13 @@ LootMComms =( function()
             print(awardee..' was awarded '..itemLink);
         end,
         [versionPingPrefix] = function(message, sender)
-            SendAddonMessage(versionPongPrefix, lootmVersion, raidMessageType);
+            debug('LootComms: versionPingPrefix');
+            SendAddonMessage(versionPongPrefix, GetAddOnMetadata("LootM", "Version"), raidMessageType);
         end,
         [versionPongPrefix] = function(message, sender)
-            LootM.RaidVersion[sender] = message;
+            debug('LootComms: versionPongPrefix ('..message..')');
+            sender = Ambiguate(sender, "none");
+            LootM.RaidVersion[sender] = "v"..message;
             local otherVersion = tonumber(message:gsub("%.", ""));
             local myVersion = tonumber(GetAddOnMetadata("LootM", "Version"):gsub("%.", ""));
             if (otherVersion > myVersion and not versionCheck) then

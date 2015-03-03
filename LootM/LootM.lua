@@ -1,7 +1,7 @@
  
 -- seterrorhandler(print);
 function debug(message)
-    -- print(message);
+   --print(message);
 end
 
 ConfirmLootAwardDialg = 'LootM_ConfirmAwardLoot';
@@ -27,7 +27,6 @@ LootM.Update = function()
         local versionTable = { }
         for i = 1, MAX_RAID_MEMBERS do
             local name = GetRaidRosterInfo(i);
-            -- TODO: Ensure name here is formatted the same as version checks in LootMComms. 
             if (name ~= nil) then
                 versionTable[name] = LootM.RaidVersion[name] or "LootM not found";
             end
@@ -64,7 +63,7 @@ function LootMEvents:LOOT_READY(...)
     debug("trying to loot...");
     if (not LootM.IsEnabled() or not LootM.IsLootMaster()) then return; end;
     local lootTable = LootM.GetLootItems();
-    if (not lootTable) then return; end
+    if (lootTable == nil or #lootTable == 0) then return; end
     if (LootMItemEntries.IsNewLoot(lootTable)) then
         LootMComms.NewLoot(lootTable);
     else
@@ -456,27 +455,27 @@ SlashCmdList["LOOTM"] = function(message)
         LootMItemEntries.Show();
     end
 
-    --    if (string.sub(message, 1, 4) == 'test') then
-    --        LootMComms.NewLoot( { string.sub(message, 5) });
-    --    elseif (string.sub(message, 1, 4) == 'need') then
-    --        name = string.sub(message, 6);
-    --        rollType = '1';
-    --    elseif (string.sub(message, 1, 4) == 'gree') then
-    --        name = string.sub(message, 7);
-    --        rollType = '2';
-    --    elseif (string.sub(message, 1, 5) == 'award') then
-    --        LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
+--        if (string.sub(message, 1, 4) == 'test') then
+--            LootMComms.NewLoot( { string.sub(message, 5) });
+--        elseif (string.sub(message, 1, 4) == 'need') then
+--            name = string.sub(message, 6);
+--            rollType = '1';
+--        elseif (string.sub(message, 1, 4) == 'gree') then
+--            name = string.sub(message, 7);
+--            rollType = '2';
+--        elseif (string.sub(message, 1, 5) == 'award') then
+--            LootMComms.Award(LootMItemEntries.GetItems()[1], 'TheNewGuy');
 
-    --    end
-    --    if (rollType) then
-    --        local x = LootMItemEntries.GetItems();
-    --        local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
-    --        LootMItemEntries.SetPlayerRoll(x[1],
-    --        name or 'TheNewGuy',
-    --        'DAMAGER', rollType,
-    --        playerDetails.PlayerItems,
-    --        playerDetails.ImprovementRaiting);
-    --    end
+--        end
+--        if (rollType) then
+--            local x = LootMItemEntries.GetItems();
+--            local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(x[1]);
+--            LootMItemEntries.SetPlayerRoll(x[1],
+--            name or 'TheNewGuy',
+--            'DAMAGER', rollType,
+--            playerDetails.PlayerItems,
+--            playerDetails.ImprovementRaiting);
+--        end
 end;
 
 -- table sort iterator
