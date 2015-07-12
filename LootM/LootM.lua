@@ -1,5 +1,5 @@
  
--- seterrorhandler(print);
+--seterrorhandler(print);
 function debug(message)
    --print(message);
 end
@@ -136,9 +136,9 @@ LootM.GetLootItems = function()
         local itemLink = GetLootSlotLink(i);
         if (itemLink) then
             _, _, itemRarity = GetItemInfo(itemLink);
-            if (itemRarity >= GetLootThreshold()) then
+            --if (itemRarity >= GetLootThreshold()) then
                 table.insert(lootTable, itemLink);
-            end
+            --end
         end
     end
     return lootTable;
@@ -459,6 +459,7 @@ SlashCmdList["LOOTM"] = function(message)
         LootMItemEntries.Show();
     end
 
+    -- ** used for internal testing ** --
 --        if (string.sub(message, 1, 4) == 'test') then
 --            LootMComms.NewLoot( { string.sub(message, 5) });
 --        elseif (string.sub(message, 1, 4) == 'need') then

@@ -120,7 +120,7 @@ local playerFrameFactory = function(parent, index, playerName, playerRole, rollI
 end;
 
 -- closure for each item being looted
-LootItemEntryFactory = function(e, previousEntry, playerDetails)
+LootItemEntryFactory = function(e, itemindex, previousEntry, playerDetails)
     debug('LootItemEntryFactory');
     local defaultFrameHeight = 52;
     local PlayerDetails = playerDetails;
@@ -128,6 +128,7 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
     local rollChances = maxRollChances;
     local itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
     GetItemInfo(e);
+    local itemIndex = itemindex;
     local playerFrames = { };
     local entryContainer = LootMFrames['LootMLootFrame'].ScrollFrame.ItemEntryContainer;
     local frame = CreateFrame('Button', nil, entryContainer, 'ItemEntryDetailsTemplate');
@@ -166,7 +167,7 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
 
     local rollButtonClickHandler = function(self)
         PlaySound("igMainMenuOptionCheckBoxOn");
-        LootMComms.Roll(self:GetID(), itemLink, PlayerDetails);
+        LootMComms.Roll(self:GetID(), itemIndex, PlayerDetails);
         ForEachRollButton( function(b)
             if (self == b) then
                 b.selectedTexture:Show();
@@ -279,11 +280,13 @@ LootItemEntryFactory = function(e, previousEntry, playerDetails)
     updateHeight();
     return {
         GetItemLink = function() return itemLink; end,
+        GetItemIndex = function () return itemIndex; end,
         IsShown = function() return isShown; end,
-        Show = function(e, playerDetails)
+        Show = function(e, itemindex, playerDetails)
             debug('LootItemEntryFactory:Show');
             itemName, itemLink, itemRarity, itemLevel, _, itemType, itemSubType, _, itemEquipLocation, itemTexture =
             GetItemInfo(e);
+            itemIndex = itemindex;
             PlayerDetails = playerDetails;
             rollChances = maxRollChances;
             turnOnRollButtons();
@@ -348,17 +351,18 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 frame.ScrollFrame.Slider:SetValue(0);
                 frame:Show();
             end,
-            ShowItem = function(itemLink, playerDetails)
+            ShowItem = function(itemLink, itemIndex, playerDetails)
                 debug('LootMItemEntries:ShowItem');
+                debug('item index: ' .. itemIndex);
                 local lastEntry;
                 for k, v in pairs(itemEntries) do
                     if (not v.IsShown()) then
-                        v.Show(itemLink, playerDetails);
+                        v.Show(itemLink, itemIndex, playerDetails);
                         return;
                     end
                     lastEntry = v;
                 end
-                table.insert(itemEntries, LootItemEntryFactory(itemLink, lastEntry, playerDetails));
+                table.insert(itemEntries, LootItemEntryFactory(itemLink, itemIndex, lastEntry, playerDetails));
             end,
             GetItems = function()
                 debug('LootMItemEntries:GetItems');
@@ -368,10 +372,11 @@ function LootMEvents.LootMLootFrame_OnLoad()
                 end
                 return output;
             end,
-            SetPlayerRoll = function(itemLink, player, role, rollId, itemsTable, improvementRating)
+            SetPlayerRoll = function(itemindex, player, role, rollId, itemsTable, improvementRating)
                 debug('LootMItemEntries:SetPlayerRoll');
                 for k, v in pairs(itemEntries) do
-                    if (v.GetItemLink() == itemLink) then
+                debug('item index: ' .. v.GetItemIndex());
+                    if (v.GetItemIndex() == itemindex) then
                         v.SetPlayerRoll(player, role, rollId, itemsTable, improvementRating);
                         return;
                     end

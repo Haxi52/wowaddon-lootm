@@ -3,9 +3,9 @@ local versionCommCheck = false;
 local versionNotice = false;
 LootMComms =( function()
 
-    --local raidMessageType = "OFFICER";
+    local raidMessageType = "GUILD";
     -- changed for testing
-    local raidMessageType = "RAID";
+    --local raidMessageType = "RAID";
     local newLootPrefix = 'LootMNew';
     local rollPrefix = 'LootMRoll';
     local awardPrefix = 'LootMAward';
@@ -30,10 +30,10 @@ LootMComms =( function()
         end
 
         LootMItemEntries.Hide();
-        for k,itemLink in pairs(newLootMessageSpool) do
+        for itemIndex,itemLink in pairs(newLootMessageSpool) do
             local playerDetails = LootMItemEvaluator.GetPlayerItemDetails(itemLink);
 
-            LootMItemEntries.ShowItem(itemLink, playerDetails);    
+            LootMItemEntries.ShowItem(itemLink, itemIndex, playerDetails);    
         end    
         LootMItemEntries.Show();
         print('[LootM] Staring new loot session. ' .. LootM.RandomLootText());
@@ -80,17 +80,13 @@ LootMComms =( function()
             for i in string.gmatch(message, "([^;]+)") do
                 table.insert(parsedMessage, i);
             end
-            local rollId, role, itemLink, improvementRating, playerItems = (function(a, b, c, d, ...)
-                return a,b,c,d,{...};
+            local rollId, role, itemIndex, improvementRating, playerItems = (function(a, b, c, d, ...)
+                return a,b,tonumber(c),d,{...};
             end)(unpack(parsedMessage));
 
             -- We are not short-circuting this logic because we want to make sure all
             -- items are being requested from the server.
             local requiresItemLoad, loadItems = false, {};
-            if (not GetItemInfo(itemLink)) then
-                requiresItemLoad = true;
-                table.insert(loadItems, itemLink);
-            end
             for k,item in pairs(playerItems) do
                 if (not GetItemInfo(item)) then
                     requiresItemLoad = true;
@@ -110,7 +106,7 @@ LootMComms =( function()
                 return;
             end
 
-            LootMItemEntries.SetPlayerRoll(itemLink, sender, role, rollId, playerItems, improvementRating);
+            LootMItemEntries.SetPlayerRoll(itemIndex, sender, role, rollId, playerItems, improvementRating);
         end,
         [awardPrefix] = function(message, sender) 
             local parsedMessage = {};
@@ -189,14 +185,14 @@ LootMComms =( function()
         end,
 
         -- singles a player's roll selection on a item being looted
-        Roll = function(rollId, itemLink, playerDetails)
+        Roll = function(rollId, itemindex, playerDetails)
             debug('LootCooms: Roll');
             local role = select(6, GetSpecializationInfoByID(LootM.GetLootSpecId()));
-            local message = { rollId, role, itemLink, playerDetails.ImprovementRaiting };
+            local message = { rollId, role, itemindex, playerDetails.ImprovementRaiting };
             for k,v in pairs(playerDetails.PlayerItems) do
                 table.insert(message, v);
             end
-            -- [rollid];[item being rolled on];[improvementrating];[table...of player equipped items]
+            -- [rollid];[index of item being rolled on];[improvementrating];[table...of player equipped items]
             SendAddonMessage(rollPrefix, table.concat(message, ';'), raidMessageType);
         end,
         Award = function(itemLink, awardee) 
