@@ -3,9 +3,9 @@ local versionCommCheck = false;
 local versionNotice = false;
 LootMComms =( function()
 
-    local raidMessageType = "GUILD";
+    --local raidMessageType = "GUILD";
     -- changed for testing
-    --local raidMessageType = "RAID";
+    local raidMessageType = "RAID";
     local newLootPrefix = 'LootMNew';
     local rollPrefix = 'LootMRoll';
     local awardPrefix = 'LootMAward';
@@ -101,7 +101,7 @@ LootMComms =( function()
                     LoadItems = loadItems,
                     MessageType = rollPrefix,
                     Message = message,
-                    Sender = sender,
+                    Sender = Ambiguate(sender, "none"),
                 });
                 return;
             end

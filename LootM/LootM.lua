@@ -136,9 +136,9 @@ LootM.GetLootItems = function()
         local itemLink = GetLootSlotLink(i);
         if (itemLink) then
             _, _, itemRarity = GetItemInfo(itemLink);
-            --if (itemRarity >= GetLootThreshold()) then
+            if (itemRarity >= GetLootThreshold()) then
                 table.insert(lootTable, itemLink);
-            --end
+            end
         end
     end
     return lootTable;
